@@ -342,7 +342,7 @@ var AirPlane = function() {
 	geomBowTopPoints = geomBowTopPoints.concat(BDCPoints);
 	geomBowTopPoints.push(new THREE.Vector3(35,45,hullWidth/2));
 	console.log(geomBowTopPoints);
-	GeometryBowDeck= new THREE.BufferGeometry().setFromPoints( geomBowTopPoints );
+	GeometryBowDeck= new THREE.BufferGeometry().setFromPoints( geomBowTopPoints ); 
 	//GeometryBowDeck = new THREE.BufferGeometry().setAttribute( 'position', new THREE.BufferAttribute( geomBowTopPoints, 3 ) );
 	console.log(GeometryBowDeck);
 
