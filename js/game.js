@@ -7,7 +7,12 @@ var Colors = {
 	pink:0xF5986E,
 	brownDark:0x23190f,
 	blue:0x68c3c0,
-
+	wood:0x765c48,
+	DarkPurple: 0x5D3FD3,
+	lightPurple: 0xBF40BF,
+	orchid: 0xDA70D6,
+	mossGreen: 0x8A9A5B,
+	oliveGreen: 0x808000
 };
 
 
@@ -121,29 +126,77 @@ function createLights() {
 
 // First let's define a Sea object :
 Sea = function(){
-	
-	// create the geometry (shape) of the cylinder;
-	// the parameters are: 
-	// radius top, radius bottom, height, number of segments on the radius, number of segments vertically
 	var geom = new THREE.CylinderGeometry(600,600,800,40,10);
-	
-	// rotate the geometry on the x axis
-	geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI/2));
-	
-	// create the material 
+	geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+
+	// important: by merging vertices we ensure the continuity of the waves
+	geom.mergeVertices();
+
+	// get the vertices
+	var l = geom.vertices.length;
+
+	// create an array to store new data associated to each vertex
+	this.waves = [];
+
+	for (var i=0; i<l; i++){
+		// get each vertex
+		var v = geom.vertices[i];
+
+		// store some data associated to it
+		this.waves.push({y:v.y,
+		 x:v.x,
+		 z:v.z,
+		 // a random angle
+		 ang:Math.random()*Math.PI*2,
+		 // a random distance
+		 amp:5 + Math.random()*15,
+		 // a random speed between 0.016 and 0.048 radians / frame
+		 speed:0.016 + Math.random()*0.032
+		});
+	};
 	var mat = new THREE.MeshPhongMaterial({
 		color:Colors.blue,
 		transparent:true,
-		opacity:.6,
+		opacity:.8,
 		shading:THREE.FlatShading,
 	});
 
-	// To create an object in Three.js, we have to create a mesh 
-	// which is a combination of a geometry and some material
 	this.mesh = new THREE.Mesh(geom, mat);
+	this.mesh.receiveShadow = true;
 
-	// Allow the sea to receive shadows
-	this.mesh.receiveShadow = true; 
+}
+
+// now we create the function that will be called in each frame 
+// to update the position of the vertices to simulate the waves
+
+Sea.prototype.moveWaves = function (){
+	
+	// get the vertices
+	var verts = this.mesh.geometry.vertices;
+	var l = verts.length;
+	
+	for (var i=0; i<l; i++){
+		var v = verts[i];
+		
+		// get the data associated to it
+		var vprops = this.waves[i];
+		
+		// update the position of the vertex
+		v.x = vprops.x + Math.cos(vprops.ang)*vprops.amp;
+		v.y = vprops.y + Math.sin(vprops.ang)*vprops.amp;
+
+		// increment the angle for the next frame
+		vprops.ang += vprops.speed;
+
+	}
+
+	// Tell the renderer that the geometry of the sea has changed.
+	// In fact, in order to maintain the best level of performance, 
+	// three.js caches the geometries and ignores any changes
+	// unless we add this line
+	this.mesh.geometry.verticesNeedUpdate=true;
+
+	sea.mesh.rotation.z += .005;
 }
 
 // Instantiate the sea and add it to the scene:
@@ -257,64 +310,40 @@ function createSky(){
 var AirPlane = function() {
 	
 	this.mesh = new THREE.Object3D();
-
-	/*
-	//extrusion method
-
 	const geomHull = new THREE.Shape();
-	geomHull.moveTo(90, 45);
-    geomHull.lineTo(90,30);
-    geomHull.moveTo(90,30);
-    geomHull.bezierCurveTo(90, 0, 50 ,-25, 30, -25);     
-    //geomHull.moveTo(30,-25);
-    geomHull.lineTo(-60,-25) ;  
-    geomHull.moveTo(-60,-25);
-    geomHull.bezierCurveTo(-90, -10, -80, -10, -90,15) ;
-    geomHull.moveTo(-90,15);
-    geomHull.lineTo(-90,45) ;
-    geomHull.moveTo(-90,45);
-    geomHull.lineTo(-60,45) ;
-    geomHull.moveTo(-60,45);
-    geomHull.lineTo(-60,30) ;
-    geomHull.moveTo(-60,30);
-    geomHull.lineTo(-30,30) ;   
-	geomHull.moveTo(-30,30);
-	geomHull.lineTo(35,30);
-	geomHull.moveTo(35,30);
-    geomHull.lineTo(35,45) ;    
-    geomHull.moveTo(35,45);
-    geomHull.lineTo(90,45) ;    
-	geomHull.moveTo(90,45);
-	const hullWidth = 50
-	const extrudeSettingsHull = { depth: hullWidth, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
-	const geometryHull = new THREE.ExtrudeGeometry( geomHull, extrudeSettingsHull );
-	*/
-	const hullPoints = [];
-	const geomHull = new THREE.Shape();
-   
-    geomHull.moveTo(35,-25);
-    geomHull.lineTo(-60,-25) ;  
-    geomHull.moveTo(-60,-25);
-    geomHull.bezierCurveTo(-90, -10, -80, -10, -90,15) ;
-    geomHull.moveTo(-90,15);
-    geomHull.lineTo(-90,45) ;
-    geomHull.moveTo(-90,45);
-    geomHull.lineTo(-60,45) ;
-    geomHull.moveTo(-60,45);
-    geomHull.lineTo(-60,30) ;
-    geomHull.moveTo(-60,30);
-    geomHull.lineTo(-30,30) ;   
-	geomHull.moveTo(-30,30);
-	geomHull.lineTo(35,30);
-	geomHull.moveTo(35,30);
-    geomHull.lineTo(35,45) ;    
-	geomHull.moveTo(35,45);
-	geomHull.lineTo(35,-25);
+    geomHull.moveTo( 35,-25);
+    geomHull.lineTo(-60,-25);  
+	geomHull.moveTo(-60,-25);
+	geomHull.lineTo(-60,-15);	
+	geomHull.moveTo(-60,-15);
+	geomHull.lineTo(-75,-15);	
+	geomHull.moveTo(-75,-15);
+	geomHull.lineTo(-75, 5);	
+	geomHull.moveTo(-75, 5);
+	geomHull.lineTo(-90, 5);	
+	geomHull.moveTo(-90, 5);
+	geomHull.lineTo(-90, 55);	
+	geomHull.moveTo(-90, 55);
+	geomHull.lineTo(-75, 55);
+	geomHull.moveTo(-75, 55);
+	geomHull.lineTo(-75, 45);
+	geomHull.lineTo(-75, 45);
+    geomHull.lineTo(-60, 45) ;
+    geomHull.moveTo(-60, 45);
+    geomHull.lineTo(-60, 30) ;
+    geomHull.moveTo(-60, 30);
+    geomHull.lineTo(-30, 30) ;   
+	geomHull.moveTo(-30, 30);
+	geomHull.lineTo( 35, 30);
+	geomHull.moveTo( 35, 30);
+    geomHull.lineTo( 35, 40);    
+	geomHull.moveTo( 35, 40);
+	geomHull.lineTo( 35,-25);
 	const hullWidth = 50
 	const extrudeSettingsHull = { depth: hullWidth, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
 	const geometryHull = new THREE.ExtrudeGeometry( geomHull, extrudeSettingsHull );
 	console.log(geometryHull);
-	var matHull = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
+	var matHull = new THREE.MeshLambertMaterial({color:Colors.wood, shading:THREE.FlatShading});
 	var hull = new THREE.Mesh(geometryHull, matHull);
 	hull.castShadow = true;
 	hull.receiveShadow = true;
@@ -322,37 +351,84 @@ var AirPlane = function() {
 	console.log(hull);
 	this.mesh.add(hull);
 
-	//the mesh and geometry that determines the deck of the bow of the ship
-	geomBowTopPoints = [];
-	const ForegroundDeckCurve = new THREE.QuadraticBezierCurve3(
-		new THREE.Vector3( 35, 45, hullWidth/2 ),
-		new THREE.Vector3( 60, 45, 2*hullWidth/3 ),
-		new THREE.Vector3( 90, 45, hullWidth/10 )
-	);
-	const FDCPoints = ForegroundDeckCurve.getPoints(10);	//array containing foreground curve points, a subarray of geomBowTopPoints
-	geomBowTopPoints = geomBowTopPoints.concat(FDCPoints);
-	geomBowTopPoints.push(new THREE.Vector3(90,45,hullWidth/10));
-	geomBowTopPoints.push(new THREE.Vector3(90,45,-hullWidth/10));
-	const BackgroundDeckCurve = new THREE.QuadraticBezierCurve3(
-		new THREE.Vector3( 90, 45, -hullWidth/10 ),
-		new THREE.Vector3( 60, 45, -2*hullWidth/3 ),
-		new THREE.Vector3( 35, 45, -hullWidth/2 )
-	);
-	const BDCPoints = BackgroundDeckCurve.getPoints(10);
-	geomBowTopPoints = geomBowTopPoints.concat(BDCPoints);
-	geomBowTopPoints.push(new THREE.Vector3(35,45,hullWidth/2));
-	console.log(geomBowTopPoints);
-	GeometryBowDeck= new THREE.BufferGeometry().setFromPoints( geomBowTopPoints ); 
-	//GeometryBowDeck = new THREE.BufferGeometry().setAttribute( 'position', new THREE.BufferAttribute( geomBowTopPoints, 3 ) );
-	console.log(GeometryBowDeck);
+	const geomBow1 = new THREE.Shape();
+	geomBow1.moveTo( 35, 40);
+	geomBow1.lineTo( 60, 40);	
+	geomBow1.moveTo( 60, 45);
+	geomBow1.lineTo( 60,-20);	
+	geomBow1.moveTo( 60,-20);
+	geomBow1.lineTo( 35,-20);	
+	geomBow1.moveTo( 35,-20);
+	geomBow1.lineTo( 35, 40);	
+	geomBow1.moveTo( 35, 40);
+	const bow1Width = hullWidth*0.9;
+	const extrudeSettingsBow1 = { depth: bow1Width, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
+	const geometryBow1 = new THREE.ExtrudeGeometry(geomBow1, extrudeSettingsBow1);
+	var bow1 = new THREE.Mesh(geometryBow1, matHull);
+	bow1.castShadow = true;
+	bow1.receiveShadow = true;
+	bow1.translateZ(-(hullWidth/2));
+	this.mesh.add(bow1);
 
-	const BowDeck = new THREE.Mesh(GeometryBowDeck,matHull);
-	BowDeck.castShadow=true;
-	BowDeck.receiveShadow = true;
-	console.log(BowDeck);
-	this.mesh.add(BowDeck);
+	const geomBow2 = new THREE.Shape();
+	geomBow2.moveTo( 60, 45);
+	geomBow2.lineTo( 75, 45);	
+	geomBow2.moveTo( 75, 45);
+	geomBow2.lineTo( 75,-10);	
+	geomBow2.moveTo( 75,-10);
+	geomBow2.lineTo( 60,-10);	
+	geomBow2.moveTo( 60,-10);
+	geomBow2.lineTo( 60, 45);	
+	geomBow2.moveTo( 60, 45);
+	const bow2Width = hullWidth*0.75;
+	const extrudeSettingsBow2 = { depth: bow2Width, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
+	const geometryBow2 = new THREE.ExtrudeGeometry(geomBow2, extrudeSettingsBow2);
+	var bow2 = new THREE.Mesh(geometryBow2, matHull);
+	bow2.castShadow = true;
+	bow2.receiveShadow = true;
+	bow2.translateZ(-(hullWidth/2));
+	this.mesh.add(bow2);
 
-	/* complete: Cabin box
+	const geomBow3 = new THREE.Shape();
+    geomBow3.moveTo( 75, 50);
+    geomBow3.lineTo( 90, 50);   
+    geomBow3.moveTo( 90, 50);
+    geomBow3.lineTo( 90, 5);   
+    geomBow3.moveTo( 90, 5);
+    geomBow3.lineTo( 75, 5);   
+    geomBow3.moveTo( 75, 5);
+    geomBow3.lineTo( 75, 50);   
+    geomBow3.moveTo( 75, 50);
+    const bow3Width = hullWidth*0.5;
+    const extrudeSettingsBow3 = { depth: bow3Width, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
+    const geometryBow3 = new THREE.ExtrudeGeometry(geomBow3, extrudeSettingsBow3);
+    var bow3 = new THREE.Mesh(geometryBow3, matHull);
+    bow3.castShadow = true;
+    bow3.receiveShadow = true;
+    bow3.translateZ(-(hullWidth/2));
+    this.mesh.add(bow3);
+
+	const geomBow4 = new THREE.Shape();
+    geomBow4.moveTo( 90, 52);
+    geomBow4.lineTo( 105, 52);   
+    geomBow4.moveTo( 105, 52);
+    geomBow4.lineTo( 105, 15);   
+    geomBow4.moveTo( 105, 15);
+    geomBow4.lineTo(  90, 15);   
+    geomBow4.moveTo(  90, 15);
+    geomBow4.lineTo( 90, 52);   
+    geomBow4.moveTo( 90, 52);
+    const bow4Width = hullWidth*0.25;
+    const extrudeSettingsBow4 = { depth: bow4Width, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
+    const geometryBow4 = new THREE.ExtrudeGeometry(geomBow4, extrudeSettingsBow4);
+    var bow4 = new THREE.Mesh(geometryBow4, matHull);
+    bow4.castShadow = true;
+    bow4.receiveShadow = true;
+    bow4.translateZ(-(hullWidth/2));
+	this.mesh.add(bow4);
+
+
+	//complete: Cabin box
 	const geomCabin = new THREE.Shape();
 	geomCabin.moveTo(30,30);
 	geomCabin.lineTo(30,50);
@@ -366,15 +442,16 @@ var AirPlane = function() {
 	const cabinWidth = 30
 	const extrudeSettingsCabin = { depth: cabinWidth, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
 	const geometryCabin = new THREE.ExtrudeGeometry(geomCabin,extrudeSettingsCabin);
-	var matCabin = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FLatShading});
-	var cabin = new THREE.Mesh(geometryCabin, matCabin);
+	//var matCabin = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FLatShading});
+	var cabin = new THREE.Mesh(geometryCabin, matHull);
 	cabin.castShadow = true;
 	cabin.receiveShadow = true;
 	cabin.translateZ(-cabinWidth/2);
 	this.mesh.add(cabin);
-	*/
+	
 
-	/* complete: mushroom
+	// complete: mushroom
+	
 	const radiusTop = 12;
 	const radiusBottom = 14;
 	const mushHeight = 50;
@@ -386,11 +463,10 @@ var AirPlane = function() {
 	mushStem.receiveShadow = true;
 	mushStem.translateY(55);
 	mushStem.translateX(-40);
-
+	//mushStem.translateZ(-radiusBottom);
 	this.mesh.add(mushStem);
 	
-	*/
-	/*
+
 	
 	const geomMushPoints = [];
 	geomMushPoints.push( new THREE.Vector2( 0, 0 ));
@@ -403,15 +479,34 @@ var AirPlane = function() {
 	geomMushPoints.push( new THREE.Vector2( 27, -5 ));
 	geomMushPoints.push( new THREE.Vector2( 27, 0 ));
 	geomMushPoints.push( new THREE.Vector2( 0, 0 ));
-	const geomMushCap = new THREE.LatheGeometry( geomMushPoints );
-	const matMushCap = new THREE.MeshBasicMaterial( { color: Colors.red, shading: THREE.FlatShading } );
-	const mushCap = new THREE.Mesh( geomMushCap, matMushCap );
-	mushCap.translateY(80);
-	mushCap.translateX(-40);
-	mushCap.translateZ(25);
-	this.mesh.add( mushCap );
-	*/
+	const geomMushCap = new THREE.LatheGeometry( geomMushPoints, 5,0, 2*3.14 );
+	const matMushCap = new THREE.MeshBasicMaterial( { color: Colors.brownDark, shading: THREE.FlatShading} );
+	this.mushCap = new THREE.Mesh( geomMushCap, matMushCap );
+	this.mushCap.castShadow = true;
+	this.mushCap.receiveShadow = true;
+	this.mushCap.translateY(80);
+	this.mushCap.translateX(-40);
+	this.mushCap.translateZ(0);
+	this.mesh.add( this.mushCap );
 	
+	// propeller
+	var geomPropeller = new THREE.BoxGeometry(35,6,10,1,1,1);
+	var matPropeller = new THREE.MeshPhongMaterial({color:Colors.brown, shading:THREE.FlatShading});
+	this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
+
+	this.propeller.castShadow = true;
+	this.propeller.receiveShadow = true;
+	// blades
+	var geomBlade = new THREE.BoxGeometry(1,45,15,1,1,1);
+	var matBlade = new THREE.MeshPhongMaterial({color:Colors.brownDark, shading:THREE.FlatShading});
+	
+	var blade = new THREE.Mesh(geomBlade, matBlade);
+	blade.position.set(-8,0,0);
+	blade.castShadow = true;
+	blade.receiveShadow = true;
+	this.propeller.add(blade);
+	this.propeller.position.set(-90,0,0);
+	this.mesh.add(this.propeller);
 
 	
 	//from previous iteration/airplane: DEPRECATED
@@ -486,6 +581,7 @@ var AirPlane = function() {
 };
 
 
+
 var airplane;
 
 function createPlane(){ 
@@ -516,18 +612,22 @@ function handleMouseMove(event) {
 
 }
 
+var flip = true;
+var flipCount = 2*3.14;
+var mushCapOriginalColor = new THREE.Color(Colors.mossGreen);
+const mushCapChangeColor = new THREE.Color(Colors.oliveGreen);
 function loop(){
 	// Rotate the propeller, the sea and the sky
 	//airplane.propeller.rotation.x += 0.3;
-	sea.mesh.rotation.z += .005;
-	sky.mesh.rotation.z += .01;
+	//sea.mesh.rotation.z += .004;
+	sea.moveWaves();
+	sky.mesh.rotation.z += .008;
 
 	// update the plane on each frame
 	updatePlane();
 
 	// render the scene
 	renderer.render(scene, camera);
-
 
 
 	// call the loop function again
@@ -546,7 +646,31 @@ function loop(){
 		// update the airplane's position
 		airplane.mesh.position.y = targetY;
 		airplane.mesh.position.x = targetX;
-		//airplane.propeller.rotation.x += 0.3;
+		airplane.propeller.rotation.x += 0.3;
+
+		if(flip)
+		{
+			flipCount += 0.02;	
+			airplane.mushCap.scale.set(Math.sin(flipCount)/15+1, 1, Math.sin(flipCount)/15+1);	
+			//airplane.mushCap.material.color.setHex(mushCapOriginalColor + flipCount*0x10);
+			airplane.mushCap.material.color.lerpColors(mushCapOriginalColor, mushCapChangeColor , (1+Math.sin(flipCount))/2 );
+			if(airplane.mushCap.position.y > 2*3.14)
+			{
+				flip = false;
+			}
+		}
+		else
+		{
+			flipCount -= 0.02;
+			airplane.mushCap.scale.set(Math.sin(flipCount)/15+1, 1 , Math.sin(flipCount)/15+1);
+			//airplane.mushCap.material.color.setHex(mushCapOriginalColor + flipCount*0x10);
+			airplane.mushCap.material.color.lerpColors(mushCapChangeColor ,mushCapOriginalColor , (1+Math.sin(flipCount))/2);
+			if(airplane.mushCap.position.y < -2*3.14)
+			{
+				flip = true;
+			}
+		}
+		
 	}
 	
 	function normalize(v,vmin,vmax,tmin, tmax){
