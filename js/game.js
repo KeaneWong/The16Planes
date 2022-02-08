@@ -118,7 +118,11 @@ function createLights() {
 	// but also the more expensive and less performant
 	shadowLight.shadow.mapSize.width = 2048;
 	shadowLight.shadow.mapSize.height = 2048;
-	
+
+	// an ambient light modifies the global color of a scene and makes the shadows softer
+	ambientLight = new THREE.AmbientLight(0xdc8874, .5);//original from example
+	scene.add(ambientLight);
+
 	// to activate the lights, just add them to the scene
 	scene.add(hemisphereLight);  
 	scene.add(shadowLight);
@@ -126,40 +130,58 @@ function createLights() {
 
 // First let's define a Sea object :
 Sea = function(){
-	var geom = new THREE.CylinderGeometry(600,600,800,40,10);
+	var geom = new THREE.CylinderBufferGeometry(600,600,800,40,10);
 	geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
 
 	// important: by merging vertices we ensure the continuity of the waves
-	geom.mergeVertices();
+	//geom.mergeVertices();
+
+	//console.log(geom);
 
 	// get the vertices
-	var l = geom.vertices.length;
+	var l = geom.attributes.position.array.length;
 
 	// create an array to store new data associated to each vertex
 	this.waves = [];
-
-	for (var i=0; i<l; i++){
+	var i = 0 ;
+	while( i < l){
 		// get each vertex
-		var v = geom.vertices[i];
+		//var v = geom.vertices[i];
 
-		// store some data associated to it
-		this.waves.push({y:v.y,
-		 x:v.x,
-		 z:v.z,
-		 // a random angle
-		 ang:Math.random()*Math.PI*2,
-		 // a random distance
-		 amp:5 + Math.random()*15,
-		 // a random speed between 0.016 and 0.048 radians / frame
-		 speed:0.016 + Math.random()*0.032
+		this.waves.push({
+			x:geom.attributes.position.array[i++],
+			y:geom.attributes.position.array[i++],
+			z:geom.attributes.position.array[i++],
+			//random angle to send the wave
+			ang: Math.random()*Math.PI*2,
+			//random distance to send it
+			amp:5 + Math.random()*15,
+			//random speed to move the wave every frame between .016 and .048 rad/frame
+			speed: 0.016 + Math.random() * 0.032
 		});
+		// store some data associated to it
+		/*
+		this.waves.push(
+		{
+			y:v.y,
+			x:v.x,
+			z:v.z,
+			// a random angle
+			ang:Math.random()*Math.PI*2,
+			// a random distance
+			amp:5 + Math.random()*15,
+			// a random speed between 0.016 and 0.048 radians / frame
+			speed:0.016 + Math.random()*0.032
+		});
+		*/
 	};
 	var mat = new THREE.MeshPhongMaterial({
 		color:Colors.blue,
 		transparent:true,
-		opacity:.8,
-		shading:THREE.FlatShading,
+		opacity:.8
+		//shading:THREE.FlatShading,
 	});
+	mat.flatShading = true;
 
 	this.mesh = new THREE.Mesh(geom, mat);
 	this.mesh.receiveShadow = true;
@@ -172,18 +194,20 @@ Sea = function(){
 Sea.prototype.moveWaves = function (){
 	
 	// get the vertices
-	var verts = this.mesh.geometry.vertices;
-	var l = verts.length;
-	
-	for (var i=0; i<l; i++){
-		var v = verts[i];
-		
+	var verts = this.mesh.geometry.attributes.position.array;
+	var l = this.waves.length;
+	var i = 0;
+	while(i<l){
+
 		// get the data associated to it
 		var vprops = this.waves[i];
-		
 		// update the position of the vertex
-		v.x = vprops.x + Math.cos(vprops.ang)*vprops.amp;
-		v.y = vprops.y + Math.sin(vprops.ang)*vprops.amp;
+		//verts[i++] = vprops.x + Math.cos(vprops.ang)*vprops.amp;
+		//verts[i++] = vprops.y + Math.sin(vprops.ang)*vprops.amp;
+		//console.log(this.mesh.geometry.attributes.position.array[0]);
+		this.mesh.geometry.attributes.position.array[i++] = vprops.x + Math.cos(vprops.ang)*vprops.amp;
+		this.mesh.geometry.attributes.position.array[i++] = vprops.y + Math.sin(vprops.ang)*vprops.amp;
+		i++;											//the 'z' component that we're skipping
 
 		// increment the angle for the next frame
 		vprops.ang += vprops.speed;
@@ -194,7 +218,9 @@ Sea.prototype.moveWaves = function (){
 	// In fact, in order to maintain the best level of performance, 
 	// three.js caches the geometries and ignores any changes
 	// unless we add this line
-	this.mesh.geometry.verticesNeedUpdate=true;
+	//console.log(this.mesh.geometry.verticesNeedUpdate);
+	this.mesh.geometry.attributes.position.needsUpdate=true;
+
 
 	sea.mesh.rotation.z += .005;
 }
@@ -342,13 +368,13 @@ var AirPlane = function() {
 	const hullWidth = 50
 	const extrudeSettingsHull = { depth: hullWidth, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 1, bevelThickness: 1 };
 	const geometryHull = new THREE.ExtrudeGeometry( geomHull, extrudeSettingsHull );
-	console.log(geometryHull);
+	//console.log(geometryHull);
 	var matHull = new THREE.MeshLambertMaterial({color:Colors.wood, shading:THREE.FlatShading});
 	var hull = new THREE.Mesh(geometryHull, matHull);
 	hull.castShadow = true;
 	hull.receiveShadow = true;
 	hull.translateZ(-(hullWidth/2));
-	console.log(hull);
+	//console.log(hull);
 	this.mesh.add(hull);
 
 	const geomBow1 = new THREE.Shape();
@@ -620,6 +646,7 @@ function loop(){
 	// Rotate the propeller, the sea and the sky
 	//airplane.propeller.rotation.x += 0.3;
 	//sea.mesh.rotation.z += .004;
+	
 	sea.moveWaves();
 	sky.mesh.rotation.z += .008;
 
@@ -644,9 +671,13 @@ function loop(){
 		var targetY = normalize(mousePos.y, -1, 1, 25, 175);
 		
 		// update the airplane's position
-		airplane.mesh.position.y = targetY;
-		airplane.mesh.position.x = targetX;
-		airplane.propeller.rotation.x += 0.3;
+		// Move the plane at each frame by adding a fraction of the remaining distance
+		airplane.mesh.position.y += (targetY-airplane.mesh.position.y)*0.05;
+		airplane.mesh.position.x += (targetX-airplane.mesh.position.x)*0.1;
+		// Rotate the plane proportionally to the remaining distance
+		airplane.mesh.rotation.z = (targetY-airplane.mesh.position.y)*0.0128;
+		airplane.mesh.rotation.x = (airplane.mesh.position.y-targetY)*0.0064;
+		airplane.propeller.rotation.x += 0.4;
 
 		if(flip)
 		{
