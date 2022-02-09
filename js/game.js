@@ -12,7 +12,9 @@ var Colors = {
 	lightPurple: 0xBF40BF,
 	orchid: 0xDA70D6,
 	mossGreen: 0x8A9A5B,
-	oliveGreen: 0x808000
+	oliveGreen: 0x808000,
+	nightSky: 0x7b8993,
+	nightSkyGradient:0x855988
 };
 
 
@@ -112,10 +114,10 @@ function createLights() {
 	shadowLight.shadow.camera.top = 400;
 	shadowLight.shadow.camera.bottom = -400;
 	shadowLight.shadow.camera.near = 1;
-	shadowLight.shadow.camera.far = 1000;
+	shadowLight.shadow.camera.far = 1400;
 
 	// define the resolution of the shadow; the higher the better, 
-	// but also the more expensive and less performant
+	// but also the more expensive and less performance
 	shadowLight.shadow.mapSize.width = 2048;
 	shadowLight.shadow.mapSize.height = 2048;
 
@@ -126,6 +128,41 @@ function createLights() {
 	// to activate the lights, just add them to the scene
 	scene.add(hemisphereLight);  
 	scene.add(shadowLight);
+}
+
+var SunCycleCount=0;
+const BackgroundLightDay = new THREE.Color(0xdc8874);
+const BackgroundLightNight = new THREE.Color(Colors.nightSky);
+function UpdateSunCycle()  {
+	shadowLight.position.set(150*Math.cos(SunCycleCount),350*Math.cos(SunCycleCount),315);
+	shadowLight.intensity =(0.6 + .3*Math.sin(3.14*shadowLight.position.y/350));
+	hemisphereLight.intensity = (0.6 + .3*Math.sin(3.14*shadowLight.position.y/350));
+	//Ambient Light: change color to a more purple hue and reduce intensity as y position goes to 0, then stay low until
+	//y position is no longer negative 
+	ambientLight.intensity = (0.3 + .2*Math.sin(3.14*shadowLight.position.y/350));
+	ambientLight.color.lerpColors(BackgroundLightNight, BackgroundLightNight, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
+	SunCycleCount+=0.003;
+	if(SunCycleCount >= 62.8318530718)//resetting because I was originally an C and assembly programmer and paranoid about overflow
+	{
+		SunCycleCount = 0;
+	}
+	var setGradientTop = lerpColor('#7b8993', '#e4e0ba', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
+	var setGradientBottom = lerpColor('#855988','#f7d9aa', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
+	document.getElementById("world").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
+
+
+	function lerpColor(a, b, amount) 
+	{ 
+    	var ah = parseInt(a.replace(/#/g, ''), 16),
+        ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff,
+        bh = parseInt(b.replace(/#/g, ''), 16),
+        br = bh >> 16, bg = bh >> 8 & 0xff, bb = bh & 0xff,
+        rr = ar + amount * (br - ar),
+        rg = ag + amount * (bg - ag),
+        rb = ab + amount * (bb - ab);
+    	return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + rb | 0).toString(16).slice(1);
+	}
+
 }
 
 // First let's define a Sea object :
@@ -159,21 +196,6 @@ Sea = function(){
 			//random speed to move the wave every frame between .016 and .048 rad/frame
 			speed: 0.016 + Math.random() * 0.032
 		});
-		// store some data associated to it
-		/*
-		this.waves.push(
-		{
-			y:v.y,
-			x:v.x,
-			z:v.z,
-			// a random angle
-			ang:Math.random()*Math.PI*2,
-			// a random distance
-			amp:5 + Math.random()*15,
-			// a random speed between 0.016 and 0.048 radians / frame
-			speed:0.016 + Math.random()*0.032
-		});
-		*/
 	};
 	var mat = new THREE.MeshPhongMaterial({
 		color:Colors.blue,
@@ -534,76 +556,6 @@ var AirPlane = function() {
 	this.propeller.position.set(-90,0,0);
 	this.mesh.add(this.propeller);
 
-	
-	//from previous iteration/airplane: DEPRECATED
-	/*
-	// Create the cabin
-	var geomCockpit = new THREE.BoxGeometry(80, 50, 50,1,1,1);
-	geomCockpit.dynamic = true;
-	geomCockpit.attributes.position.needsUpdate = true;
-	var matCockpit = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
-	
-	geomVertices = geomCockpit.attributes.position.array;
-	console.log(geomCockpit);
-
-	geomCockpit.setDrawRange(0,100);
-
-	//geomCockpit.attributes.position.needsUpdate = true;
-	console.log(geomCockpit);
-	geomCockpit.attributes.position.needsUpdate = true;
-
-	var cockpit = new THREE.Mesh(geomCockpit, matCockpit);
-	cockpit.castShadow = true;
-	cockpit.receiveShadow = true;
-	this.mesh.add(cockpit);
-
-
-
-	// Create the engine
-	var geomEngine = new THREE.BoxGeometry(20,50,50,1,1,1);
-	var matEngine = new THREE.MeshPhongMaterial({color:Colors.white, shading:THREE.FlatShading});
-	var engine = new THREE.Mesh(geomEngine, matEngine);
-	engine.position.x = 40;
-	engine.castShadow = true;
-	engine.receiveShadow = true;
-	this.mesh.add(engine);
-	
-	// Create the tail
-	var geomTailPlane = new THREE.BoxGeometry(15,20,5,1,1,1);
-	var matTailPlane = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
-	var tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
-	tailPlane.position.set(-35,25,0);
-	tailPlane.castShadow = true;
-	tailPlane.receiveShadow = true;
-	this.mesh.add(tailPlane);
-	
-	// Create the wing
-	var geomSideWing = new THREE.BoxGeometry(40,8,150,1,1,1);
-	var matSideWing = new THREE.MeshPhongMaterial({color:Colors.red, shading:THREE.FlatShading});
-	var sideWing = new THREE.Mesh(geomSideWing, matSideWing);
-	sideWing.castShadow = true;
-	sideWing.receiveShadow = true;
-	this.mesh.add(sideWing);
-	
-	// propeller
-	var geomPropeller = new THREE.BoxGeometry(20,10,10,1,1,1);
-	var matPropeller = new THREE.MeshPhongMaterial({color:Colors.brown, shading:THREE.FlatShading});
-	this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
-	this.propeller.castShadow = true;
-	this.propeller.receiveShadow = true;
-	
-	// blades
-	var geomBlade = new THREE.BoxGeometry(1,100,20,1,1,1);
-	var matBlade = new THREE.MeshPhongMaterial({color:Colors.brownDark, shading:THREE.FlatShading});
-	
-	var blade = new THREE.Mesh(geomBlade, matBlade);
-	blade.position.set(8,0,0);
-	blade.castShadow = true;
-	blade.receiveShadow = true;
-	this.propeller.add(blade);
-	this.propeller.position.set(50,0,0);
-	this.mesh.add(this.propeller);
-	*/
 };
 
 
@@ -618,7 +570,8 @@ function createPlane(){
 }
 
 
-var mousePos={x:0, y:0};
+var mousePos = {x:0, y:0};
+var clickPos = {x:0, y:0};
 
 // now handle the mousemove event
 
@@ -637,10 +590,61 @@ function handleMouseMove(event) {
 	mousePos = {x:tx, y:ty};
 
 }
+var idle = true;
+var idleAnimationCount = 0;
+function handleClick(event) {
+	if(idle == false)
+	{
+		//flag indicates that the idle animation is now on and that the boat must be put into a bobbing animation
+		idle = true;
+		idleAnimationCount = 0;
+		clickPos.x = -1 + (event.clientX / WIDTH)*2;
+		clickPos.y =  1 - (event.clientY / HEIGHT)*2;
+	}
+	else{
+		idle = false;
+		
+
+	}
+}
+
+
+function followMouse(){
+	var targetX = normalize(mousePos.x, -1, 1, -100, 100);
+	var targetY = normalize(mousePos.y, -1, 1, 25, 175);
+	
+
+	return {targetX,targetY};
+}
+
+
+function idleAnimation(){
+	var targetX = normalize(clickPos.x,-1,1,-100,100);
+	var targetY = normalize(Math.sin(idleAnimationCount),-1,1,-15,15) + normalize(clickPos.y,-1,1,25,175);
+	idleAnimationCount+= 0.01
+	if(idleAnimationCount >= 62831.8)
+	{
+		idleAnimationCount = 0;
+	}
+	return {targetX, targetY};
+
+	
+}
+function normalize(v,vmin,vmax,tmin, tmax){
+	
+	var nv = Math.max(Math.min(v,vmax), vmin);
+	var dv = vmax-vmin;
+	var pc = (nv-vmin)/dv;
+	var dt = tmax-tmin;
+	var tv = tmin + (pc*dt);
+	return tv;
+
+}
+
 
 var flip = true;
 var flipCount = 2*3.14;
-var mushCapOriginalColor = new THREE.Color(Colors.mossGreen);
+const mushCapOriginalColor = new THREE.Color(Colors.mossGreen);
 const mushCapChangeColor = new THREE.Color(Colors.oliveGreen);
 function loop(){
 	// Rotate the propeller, the sea and the sky
@@ -649,6 +653,9 @@ function loop(){
 	
 	sea.moveWaves();
 	sky.mesh.rotation.z += .008;
+
+	//update the sun
+	UpdateSunCycle();
 
 	// update the plane on each frame
 	updatePlane();
@@ -661,22 +668,29 @@ function loop(){
 	requestAnimationFrame(loop);
 
 	function updatePlane(){
-
-		// let's move the airplane between -100 and 100 on the horizontal axis, 
-		// and between 25 and 175 on the vertical axis,
-		// depending on the mouse position which ranges between -1 and 1 on both axes;
-		// to achieve that we use a normalize function (see below)
+		if(idle == false)
+		{
+			targetCoord = followMouse();
+			targetX = targetCoord.targetX;
+			targetY = targetCoord.targetY;
+		}
+		else
+		{
+			targetCoord = idleAnimation();
+			targetX = targetCoord.targetX;
+			targetY = targetCoord.targetY;
+		}
 		
-		var targetX = normalize(mousePos.x, -1, 1, -100, 100);
-		var targetY = normalize(mousePos.y, -1, 1, 25, 175);
-		
-		// update the airplane's position
+		// update the airplane's position, we use a different targetx and targety depending on whether we clicked or not
 		// Move the plane at each frame by adding a fraction of the remaining distance
-		airplane.mesh.position.y += (targetY-airplane.mesh.position.y)*0.05;
-		airplane.mesh.position.x += (targetX-airplane.mesh.position.x)*0.1;
+		airplane.mesh.position.y += (targetY-airplane.mesh.position.y)*0.035;
+		airplane.mesh.position.x += (targetX-airplane.mesh.position.x)*0.07;
 		// Rotate the plane proportionally to the remaining distance
-		airplane.mesh.rotation.z = (targetY-airplane.mesh.position.y)*0.0128;
-		airplane.mesh.rotation.x = (airplane.mesh.position.y-targetY)*0.0064;
+		airplane.mesh.rotation.z = (targetY-airplane.mesh.position.y)*0.0090;
+		airplane.mesh.rotation.x = (airplane.mesh.position.y-targetY)*0.0050;
+
+
+
 		airplane.propeller.rotation.x += 0.4;
 
 		if(flip)
@@ -704,16 +718,6 @@ function loop(){
 		
 	}
 	
-	function normalize(v,vmin,vmax,tmin, tmax){
-	
-		var nv = Math.max(Math.min(v,vmax), vmin);
-		var dv = vmax-vmin;
-		var pc = (nv-vmin)/dv;
-		var dt = tmax-tmin;
-		var tv = tmin + (pc*dt);
-		return tv;
-	
-	}
 }
 
 function init()  
@@ -735,6 +739,9 @@ function init()
 
 	//add the listener
 	document.addEventListener('mousemove', handleMouseMove, false);
+
+	document.addEventListener('click', handleClick, false);
+
 
 
     //the loop that updates the objects per frame (i.e positions and animations)
