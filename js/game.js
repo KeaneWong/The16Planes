@@ -148,7 +148,7 @@ function UpdateSunCycle()  {
 	}
 	var setGradientTop = lerpColor('#7b8993', '#e4e0ba', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
 	var setGradientBottom = lerpColor('#855988','#f7d9aa', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
-	document.getElementById("world").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
+	document.getElementById("gameholder").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
 
 
 	function lerpColor(a, b, amount) 
@@ -244,7 +244,15 @@ Sea.prototype.moveWaves = function (){
 	this.mesh.geometry.attributes.position.needsUpdate=true;
 
 
-	sea.mesh.rotation.z += .005;
+	if(idle)
+	{
+		sea.mesh.rotation.z += .0035;
+	}
+	else
+	{
+		sea.mesh.rotation.z += .005;	
+	}
+	
 }
 
 // Instantiate the sea and add it to the scene:
@@ -652,7 +660,15 @@ function loop(){
 	//sea.mesh.rotation.z += .004;
 	
 	sea.moveWaves();
-	sky.mesh.rotation.z += .008;
+	if(idle)
+	{
+		sky.mesh.rotation.z+=.005;
+	}
+	else
+	{
+		sky.mesh.rotation.z += .008;
+	}
+	
 
 	//update the sun
 	UpdateSunCycle();

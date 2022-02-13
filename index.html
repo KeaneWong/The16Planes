@@ -9,12 +9,39 @@
 		<meta name="keywords" content="three.js, webgl, tutorial, game, 3d, animation, airplane, web development, javascript" />
 		<meta name="author" content="Karim Maaloul for Codrops" />
 		<link href='https://fonts.googleapis.com/css?family=Playfair+Display:400,700,700italic' rel='stylesheet' type='text/css'>
-		<link rel="stylesheet" type="text/css" href="css/game.css" />	
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Quintessential&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="css/game.css" />	
         <script type="text/javascript" src="js/three.min.js"></script>
         <script type="text/javascript" src="js/game.js"></script>
     </head>
     <body>
-        <div id = "world" > </div>
+        <div class = 'game-holder' id = "gameholder">
+            <div class = "header" >    
+                <svg viewBox="0 30 500 500">
+                    <defs>
+                        <linearGradient id="Gradient2" fx = "10%">
+                            <stop offset="0%" stop-color="#d1b790"/>
+                            
+                            <stop offset="50%" stop-color="#FFD700"/>
+                            
+                            <stop offset="100%" stop-color="#d1b790"/>
+                            <animate attributeName="fx" dur="700ms" from="100%" to="0%" repeatCount="indefinite" />
+                        </linearGradient>
+                    </defs>
+                    <path id="curve" d="M73.2,148.6c4-6.1,65.5-96.8,178.6-95.6c111.3,1.2,170.8,90.3,175.1,97" />
+                        <text width="500"  class = 'shine noselect' fill = "url(#Gradient2)">
+                            <textPath xlink:href="#curve" startOffset="50%" text-anchor="middle">
+                                Around the Planes in 180 Days
+                            </textPath>
+                        </text>
+                </svg>
+                    
 
+
+            </div>
+            <div id = "world" > </div>
+        </div>
     </body>
 </html>
