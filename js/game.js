@@ -24,7 +24,9 @@ var Colors = {
 
 var scene,
 		camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
-        renderer, container;
+		renderer, container;
+		
+
 function createScene()
 {
 	HEIGHT = window.innerHeight;
@@ -141,15 +143,14 @@ function UpdateSunCycle()  {
 	//y position is no longer negative 
 	ambientLight.intensity = (0.3 + .2*Math.sin(3.14*shadowLight.position.y/350));
 	ambientLight.color.lerpColors(BackgroundLightNight, BackgroundLightNight, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
-	SunCycleCount+=0.003;
+	SunCycleCount+=0.002;
 	if(SunCycleCount >= 62.8318530718)//resetting because I was originally an C and assembly programmer and paranoid about overflow
 	{
 		SunCycleCount = 0;
 	}
-	var setGradientTop = lerpColor('#7b8993', '#e4e0ba', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
-	var setGradientBottom = lerpColor('#855988','#f7d9aa', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
+	var setGradientTop = lerpColor('#e4e0ff', '#e4e0ba', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));//changes colors to a different one at nighttime
+	var setGradientBottom = lerpColor('#f7d9ff','#f7d9aa', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
 	document.getElementById("gameholder").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
-
 
 	function lerpColor(a, b, amount) 
 	{ 
@@ -213,6 +214,8 @@ Sea = function(){
 // now we create the function that will be called in each frame 
 // to update the position of the vertices to simulate the waves
 
+
+var extraSpeed = 0;
 Sea.prototype.moveWaves = function (){
 	
 	// get the vertices
@@ -250,7 +253,8 @@ Sea.prototype.moveWaves = function (){
 	}
 	else
 	{
-		sea.mesh.rotation.z += .005;	
+		extraSpeed = normalize(mousePosNormed.x,-.5,.5,-0.0024, 0.0024);
+		sea.mesh.rotation.z += .005+extraSpeed;	
 	}
 	
 }
@@ -578,9 +582,95 @@ function createPlane(){
 }
 
 
+var DieRoll = function(){
+	this.mesh = new THREE.Object3D(); 
+	var geometryDie = new THREE.IcosahedronGeometry(10, 0);
+	var matDie = new THREE.MeshLambertMaterial({color:Colors.red});
+	var die = new THREE.Mesh(geometryDie, matDie);
+	
+	this.mesh.add(die);
+
+}
+
+var die;
+function createDie(){
+	die = new DieRoll();
+	die.mesh.position.y = 60;
+	die.mesh.position.x = 0;
+	die.mesh.position.z = 100;
+	scene.add(die.mesh);
+}
+
+
+var hasBeenRolled = false;
+var isRolling = false;
+var displayNumber = false;
+var isSelected = false;
+var targetQuaternion = new THREE.Quaternion();
+var rotationMatrix = new THREE.Matrix4();
+//object used to track where we are in animation between loops
+var dieAnimationFlags = {inRandomPhase: false, inInterpolationPhase: false};
+const rollSpeed = 2;
+var normal = new THREE.Vector3();
+const clock = new THREE.Clock();
+//var a = new THREE.Vector3(), 
+//b = new THREE.Vector3(), 
+//c = new THREE.Vector3(); // for re-use
+function rollDie(){
+	//if flag to roll is on, send flag to remove previous number,
+	//then randomly pick a face calculate the quaternion associated with it 
+	//interpolate towards the chosen face at some speed
+	//stop and flip animation 'isrolling' flag, then flip the flag to display new number
+	const delta = clock.getDelta();
+	if(hasBeenRolled){
+		if(isRolling)
+		{
+			//you dont want to calculate quaternionss every frame, it gets costly
+			if(!isSelected)
+			{
+				let chosenFaceIndex = Math.floor(Math.random()*20);
+				//console.log(die);
+				let randomPlace = new THREE.Vector3(-1+2*Math.random(), -1+2*Math.random(), -1+2*Math.random());
+				randomPlace.normalize();
+				targetQuaternion.setFromUnitVectors( new THREE.Vector3(0,0,1), randomPlace);
+				console.log(randomPlace);
+				isSelected = true;
+			}
+			if ( ! die.mesh.quaternion.equals( targetQuaternion ) ) {
+
+				const step = rollSpeed * delta;
+				die.mesh.quaternion.rotateTowards( targetQuaternion, step );
+
+			}
+			else{
+				//set isRolling to false. makes sure we reset flag for next time
+				isRolling = false;
+				animationdone = true;
+			}
+
+		}	
+		else{
+			//after we're done rolling we wanna flag the chosenface
+			isSelected = false;
+		}
+	}
+	else{
+		//idle animation while waiting for the very first roll
+		die.mesh.rotation.y += .01;
+	}
+	
+}
+
+
+
 var mousePos = {x:0, y:0};
+var mousePosNormed = {x: 0, y: 0};
 var clickPos = {x:0, y:0};
 
+const cameraFarPos = 500;
+const cameraNearPos = 150;
+const planeMinSpeed=1.2;
+const planeMaxSpeed=1.6;
 // now handle the mousemove event
 
 function handleMouseMove(event) {
@@ -620,7 +710,8 @@ function handleClick(event) {
 function followMouse(){
 	var targetX = normalize(mousePos.x, -1, 1, -100, 100);
 	var targetY = normalize(mousePos.y, -1, 1, 25, 175);
-	
+	mousePosNormed.x = targetX;
+	mousePosNormed.y = targetY;
 
 	return {targetX,targetY};
 }
@@ -655,9 +746,8 @@ var flipCount = 2*3.14;
 const mushCapOriginalColor = new THREE.Color(Colors.mossGreen);
 const mushCapChangeColor = new THREE.Color(Colors.oliveGreen);
 function loop(){
-	// Rotate the propeller, the sea and the sky
-	//airplane.propeller.rotation.x += 0.3;
-	//sea.mesh.rotation.z += .004;
+	
+
 	
 	sea.moveWaves();
 	if(idle)
@@ -676,6 +766,9 @@ function loop(){
 	// update the plane on each frame
 	updatePlane();
 
+	//mess with the die
+	rollDie();
+
 	// render the scene
 	renderer.render(scene, camera);
 
@@ -689,6 +782,7 @@ function loop(){
 			targetCoord = followMouse();
 			targetX = targetCoord.targetX;
 			targetY = targetCoord.targetY;
+			
 		}
 		else
 		{
@@ -697,6 +791,8 @@ function loop(){
 			targetY = targetCoord.targetY;
 		}
 		
+		
+
 		// update the airplane's position, we use a different targetx and targety depending on whether we clicked or not
 		// Move the plane at each frame by adding a fraction of the remaining distance
 		airplane.mesh.position.y += (targetY-airplane.mesh.position.y)*0.035;
@@ -705,16 +801,17 @@ function loop(){
 		airplane.mesh.rotation.z = (targetY-airplane.mesh.position.y)*0.0090;
 		airplane.mesh.rotation.x = (airplane.mesh.position.y-targetY)*0.0050;
 
-
-
-		airplane.propeller.rotation.x += 0.4;
+		//propeller animation. Extraspeed is between -0.0012 and 0.0024
+		let propellerExtraSpeed = extraSpeed * 100;
+		airplane.propeller.rotation.x += 0.4 + propellerExtraSpeed;
 
 		if(flip)
 		{
-			flipCount += 0.02;	
-			airplane.mushCap.scale.set(Math.sin(flipCount)/15+1, 1, Math.sin(flipCount)/15+1);	
+			flipCount += 0.015;	
+			airplane.mushCap.scale.set(Math.sin(flipCount)/7+1.1, 1, Math.sin(flipCount)/7+1.1);	
 			//airplane.mushCap.material.color.setHex(mushCapOriginalColor + flipCount*0x10);
-			airplane.mushCap.material.color.lerpColors(mushCapOriginalColor, mushCapChangeColor , (1+Math.sin(flipCount))/2 );
+			airplane.mushCap.material.color.lerpColors(mushCapOriginalColor, mushCapChangeColor , (0.5+Math.sin(flipCount)/2) );
+			
 			if(airplane.mushCap.position.y > 2*3.14)
 			{
 				flip = false;
@@ -722,10 +819,10 @@ function loop(){
 		}
 		else
 		{
-			flipCount -= 0.02;
-			airplane.mushCap.scale.set(Math.sin(flipCount)/15+1, 1 , Math.sin(flipCount)/15+1);
+			flipCount -= 0.015;
+			airplane.mushCap.scale.set(Math.sin(flipCount)/7+1.1, 1 , Math.sin(flipCount)/7+1.1);
 			//airplane.mushCap.material.color.setHex(mushCapOriginalColor + flipCount*0x10);
-			airplane.mushCap.material.color.lerpColors(mushCapChangeColor ,mushCapOriginalColor , (1+Math.sin(flipCount))/2);
+			airplane.mushCap.material.color.lerpColors(mushCapChangeColor ,mushCapOriginalColor , (0.5+Math.sin(flipCount)/2));
 			if(airplane.mushCap.position.y < -2*3.14)
 			{
 				flip = true;
@@ -751,7 +848,9 @@ function init()
 
     createSea();
 
-    createSky();
+	createSky();
+	
+	createDie(); //'die' meaning singular dice
 
 	//add the listener
 	document.addEventListener('mousemove', handleMouseMove, false);
@@ -766,3 +865,24 @@ function init()
 };
 
 window.addEventListener('load', init, false);
+
+
+//jquery section
+$(document).ready(function(){
+	
+	
+    //when we click diceRoller
+    $("#diceRoller").click(function(){
+
+		if(hasBeenRolled == false)
+		{
+			hasBeenRolled = true;
+		}
+		if(isRolling == false)
+		{
+			isRolling = true;
+		}
+
+    })
+  
+  });
