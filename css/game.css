@@ -86,13 +86,18 @@
 
 #diceRoller{
 	font-family: 'Playfair Display';
-	font-size: 0.85em;
-	bottom: 8vh;
+	font-weight: 900;
+	font-size: 1em;
+	bottom: 14vh;
 	letter-spacing: 0.2em;
 	display: block;
-	text-align: left;
+	text-align: center;
 	z-index: 10;
+	width: 100%;
 	position: absolute;
+	color:transparent;
+
+	
 }
 
 
@@ -137,6 +142,17 @@ text {
 	100% {
 		background-position: 1000px;
 	}
+}
+.shineGold {
+	background: #FFD700 linear-gradient(to right, #FFD700, white, #FFD700) 0 0 no-repeat;
+	background-size: 25%;
+	color: #FFD700;
+	-webkit-background-clip: text;
+	background-clip: text;
+	animation-name: shine;
+	animation-duration: 7s;
+	animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px rgba(64, 124, 56, 0.2);
 }
 
 

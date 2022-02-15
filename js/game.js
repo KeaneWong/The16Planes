@@ -584,21 +584,25 @@ function createPlane(){
 
 var DieRoll = function(){
 	this.mesh = new THREE.Object3D(); 
-	var geometryDie = new THREE.IcosahedronGeometry(10, 0);
+	var geometryDie = new THREE.IcosahedronBufferGeometry(10, 0);
 	var matDie = new THREE.MeshLambertMaterial({color:Colors.red});
-	var die = new THREE.Mesh(geometryDie, matDie);
-	
-	this.mesh.add(die);
+	var Die = new THREE.Mesh(geometryDie, matDie);
+	//console.log(this.mesh.geometry.attributes.position.array);
+	this.mesh.add(Die);
 
 }
 
 var die;
+var faceNormalsArray;
 function createDie(){
 	die = new DieRoll();
 	die.mesh.position.y = 60;
 	die.mesh.position.x = 0;
 	die.mesh.position.z = 100;
+	//console.log(die.mesh.children[0].geometry.attributes.normal.array);
+	faceNormalsArray = die.mesh.children[0].geometry.attributes.normal.array;
 	scene.add(die.mesh);
+
 }
 
 
@@ -613,9 +617,7 @@ var dieAnimationFlags = {inRandomPhase: false, inInterpolationPhase: false};
 const rollSpeed = 2;
 var normal = new THREE.Vector3();
 const clock = new THREE.Clock();
-//var a = new THREE.Vector3(), 
-//b = new THREE.Vector3(), 
-//c = new THREE.Vector3(); // for re-use
+
 function rollDie(){
 	//if flag to roll is on, send flag to remove previous number,
 	//then randomly pick a face calculate the quaternion associated with it 
@@ -629,11 +631,15 @@ function rollDie(){
 			if(!isSelected)
 			{
 				let chosenFaceIndex = Math.floor(Math.random()*20);
-				//console.log(die);
-				let randomPlace = new THREE.Vector3(-1+2*Math.random(), -1+2*Math.random(), -1+2*Math.random());
-				randomPlace.normalize();
-				targetQuaternion.setFromUnitVectors( new THREE.Vector3(0,0,1), randomPlace);
-				console.log(randomPlace);
+				//console.log(die.mesh.children[0]);
+			
+
+				//let randomPlace = new THREE.Vector3(-1+2*Math.random(), -1+2*Math.random(), -1+2*Math.random());
+				//randomPlace.normalize();
+				var chosenFaceNormal = new THREE.Vector3( faceNormalsArray[chosenFaceIndex*9],faceNormalsArray[chosenFaceIndex*9+1] , faceNormalsArray[chosenFaceIndex*9+2] );
+				var vectorTowardsCamera = new THREE.Vector3(0,0.5,1);
+				vectorTowardsCamera.normalize();
+				targetQuaternion.setFromUnitVectors(chosenFaceNormal , vectorTowardsCamera);
 				isSelected = true;
 			}
 			if ( ! die.mesh.quaternion.equals( targetQuaternion ) ) {
@@ -646,6 +652,10 @@ function rollDie(){
 				//set isRolling to false. makes sure we reset flag for next time
 				isRolling = false;
 				animationdone = true;
+				
+				$("#diceRoller").animate({
+					opacity: 1.0
+				}, 2000);
 			}
 
 		}	
@@ -691,19 +701,33 @@ function handleMouseMove(event) {
 var idle = true;
 var idleAnimationCount = 0;
 function handleClick(event) {
-	if(idle == false)
+	onDiceRoll = false;
+	$("#diceRoller").click(isOnDiceRoll);
+	if(!onDiceRoll)
 	{
-		//flag indicates that the idle animation is now on and that the boat must be put into a bobbing animation
-		idle = true;
-		idleAnimationCount = 0;
-		clickPos.x = -1 + (event.clientX / WIDTH)*2;
-		clickPos.y =  1 - (event.clientY / HEIGHT)*2;
-	}
-	else{
-		idle = false;
-		
+		if(idle == false)
+		{
+			//flag indicates that the idle animation is now on and that the boat must be put into a bobbing animation
+			idle = true;
+			idleAnimationCount = 0;
+			clickPos.x = -1 + (event.clientX / WIDTH)*2;
+			clickPos.y =  1 - (event.clientY / HEIGHT)*2;
 
+		}
+		else{
+
+
+			idle = false;
+
+			
+
+		}
 	}
+
+}
+var onDiceRoll = false;
+function isOnDiceRoll(){
+	onDiceRoll = true;
 }
 
 
@@ -855,7 +879,10 @@ function init()
 	//add the listener
 	document.addEventListener('mousemove', handleMouseMove, false);
 
-	document.addEventListener('click', handleClick, false);
+	//leave it as mouseup, click causes the idle animation while rolling to bug out as it registers click
+	//as 2 separate events
+
+	document.addEventListener('mouseup', handleClick, false);
 
 
 
@@ -874,6 +901,11 @@ $(document).ready(function(){
     //when we click diceRoller
     $("#diceRoller").click(function(){
 
+		//console.log("What");
+		idle = !idle;
+		$("#diceRoller").animate({
+			opacity: 0
+		}, 100, GenerateNumber);
 		if(hasBeenRolled == false)
 		{
 			hasBeenRolled = true;
@@ -882,7 +914,15 @@ $(document).ready(function(){
 		{
 			isRolling = true;
 		}
+		
 
-    })
-  
+		
+
+	});
   });
+  function GenerateNumber(){
+	// will be called when all the animations on the queue finish
+	var numberRolled = 1+Math.floor(Math.random()*20);//between 1 and 20
+	$("#diceRoller").text(numberRolled);
+	$("#diceRoller").css("font-size", 1.5 + "em");
+};
