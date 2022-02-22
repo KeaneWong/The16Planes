@@ -16,17 +16,127 @@ var Colors = {
 	nightSky: 0x7b8993,
 	nightSkyGradient:0x855988
 };
+var curPlane = 21;
+const Planes = [
+	
+	{
+		Name: "Plane of Fire",
+        color1: "#D74009",
+        color2: "#EE6B0B"
+	},
+    {
+		Name: "Plane of Air",
+		color1: "#CAE35F",
+		color2: "#DAE35F"
+    },
+    {
+		Name: "Plane of Water",
+		color1: "#BBCDD9",
+		color2: "#CBCDD9"
+    },
+    {
+		Name: "Plane of Earth",
+		color1: "#B98378",
+		color2: "#C98378"
+    },
+    {
+		Name: "Mechanus",
+		color1: "#B9A167",
+		color2: "#C9A167"
+    },
+    {
+		Name: "Arcadia",
+		color1: "#9DB569",
+		color2: "#AdB569"
+	},
+    {
+		Name: "Mount Celestia",
+		color1: "#DBDBDB",
+		color2: "#EBDBDB"
+    },
+    {
+		Name: "Bytopia",
+		color1: "#D4AF37",
+		color2: "#aaa9ad"
+    },
+    {
+		Name: "Elysium",
+		color1: "#BCE6FF",
+		color2: "CCE6FF"
+    },
+    {
+		Name: "Beastlands",
+		color1: "#D9D7C7",
+		color2: "#E9D7C7"
+    },
+    {
+		Name: "Arborea",
+		color1: "#957641",
+		color2: "#A57641"
+	},
+    {
+		Name: "Ysgard",
+		color1: "#CEEAEE",
+		color2: "#DEEAEE"
+    },
+    {
+		Name: "Limbo",
+		color1: "#0047ab",
+		color2: "#301934" 
+    },
+    {
+		Name: "Pandemonium",
+		color1: "#0047ab",
+		color2: "#FFA500."
+    },
+    {
+		Name: "Abyss",
+		color1: "#3d492b",
+		color2: "#47193b"
+    },
+    {
+		Name: "Carceri",
+		color1: "#C9C1B5.",
+		color2: "#D9C1B5."
+	},
+    {
+		Name: "Hades",
+		color1: "#7D8A96",
+		color2: "#*D8A96"
+    },
+    {
+		Name: "Gehenna",
+		color1: "#E2E5DE",
+		color2: "#F2E5DE"
+    },
+    {
+		Name: "Nine Hells",
+		color1: "#E71E02",
+		color2: "#FF4605"
+    },
+    {
+		Name: "Acheron",
+		color1: "#2A4C7E",
+		color2: "#888C8D"
+	},
+	{
+		Name: "Home",
+		color1: "#e4e0ba",
+		color2: "#f7d9aa"
+	},
+	
+    
+
+];
 
 
 
-
-
+var storedNames = JSON.parse(localStorage.getItem("names"));
 
 var scene,
 		camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
 		renderer, container;
 		
-
 function createScene()
 {
 	HEIGHT = window.innerHeight;
@@ -148,8 +258,8 @@ function UpdateSunCycle()  {
 	{
 		SunCycleCount = 0;
 	}
-	var setGradientTop = lerpColor('#e4e0ff', '#e4e0ba', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));//changes colors to a different one at nighttime
-	var setGradientBottom = lerpColor('#f7d9ff','#f7d9aa', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
+	var setGradientTop 		= 	lerpColor(Planes[curPlane-1].color1,  '#98eff9', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));//changes colors to a different one at nighttime
+	var setGradientBottom 	= 	lerpColor(Planes[curPlane-1].color2,  '#a8eff9', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
 	document.getElementById("gameholder").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
 
 	function lerpColor(a, b, amount) 
@@ -249,11 +359,12 @@ Sea.prototype.moveWaves = function (){
 
 	if(idle)
 	{
-		sea.mesh.rotation.z += .0035;
+		extraSpeed = normalize(mousePosNormed.x,-.5,.5,-0.001, 0.0024);
+		sea.mesh.rotation.z += .003 + extraSpeed;
 	}
 	else
 	{
-		extraSpeed = normalize(mousePosNormed.x,-.5,.5,-0.0024, 0.0024);
+		extraSpeed = normalize(mousePosNormed.x,-.5,.5,-0.001, 0.0024);
 		sea.mesh.rotation.z += .005+extraSpeed;	
 	}
 	
@@ -655,7 +766,11 @@ function rollDie(){
 				
 				$("#diceRoller").animate({
 					opacity: 1.0
-				}, 2000);
+				}, 1000, function(){
+					//console.log(Planes[curPlane-1]);
+					curPlane = numberRolled;
+					FadeIn();
+				});
 			}
 
 		}	
@@ -890,10 +1005,9 @@ function init()
     loop();
 	
 };
+var numberRolled = 21;
 
 window.addEventListener('load', init, false);
-
-
 //jquery section
 $(document).ready(function(){
 	
@@ -902,10 +1016,11 @@ $(document).ready(function(){
     $("#diceRoller").click(function(){
 
 		//console.log("What");
+		//this idle = !idle line keeps the ship from flipflopping when pressing roll button
 		idle = !idle;
 		$("#diceRoller").animate({
 			opacity: 0
-		}, 100, GenerateNumber);
+		}, 200, GenerateNumber);
 		if(hasBeenRolled == false)
 		{
 			hasBeenRolled = true;
@@ -915,14 +1030,111 @@ $(document).ready(function(){
 			isRolling = true;
 		}
 		
+		$('#curWorld').animate({
+			opacity:0
+		}, 200);
 
 		
 
 	});
   });
-  function GenerateNumber(){
+
+
+function GenerateNumber(){
 	// will be called when all the animations on the queue finish
-	var numberRolled = 1+Math.floor(Math.random()*20);//between 1 and 20
+	numberRolled = 1+Math.floor(Math.random()*20);//between 1 and 20
+	//curPlane = numberRolled;
 	$("#diceRoller").text(numberRolled);
 	$("#diceRoller").css("font-size", 1.5 + "em");
 };
+
+//Important: Sets the name of the plane and then fades in. Is called once new dice roll is done with animation
+
+function FadeIn (){
+
+	//get the welcome msg element
+	var $all_msg = $('#curWorld');
+
+	jQuery('#curWorld').css('opacity', '1');
+
+	//get a list of letters from the welcome text
+	//var $wordList = $('#curWorld').text().split("");
+	var $wordList = Planes[curPlane-1].Name.split("");
+
+	//clear the welcome text msg
+	$('#curWorld').text("");
+
+	//loop through the letters in the $wordList array
+	$.each($wordList, function(idx, elem) {
+	  //create a span for the letter and set opacity to 0
+	  var newEL = $("<span/>").text(elem).css({
+		opacity: 0
+	  });
+	  //append it to the welcome message
+	  newEL.appendTo($all_msg);
+	  //set the delay on the animation for this element
+	  newEL.delay(idx * 70);
+	  //animate the opacity back to full 1
+	  newEL.animate({
+		opacity: 1
+	  }, 1100);
+	});
+  };
+
+  /*
+  function FadeIn() {
+	//get the welcome msg element
+	var $all_msg = $('#curWorld');
+	//get a list of letters from the welcome text
+	//var $wordList = $('#curWorld').html().split("");
+	var $wordList = Planes[curPlane-1].Name.split("");
+	//clear the welcome text msg
+	$('#curWorld').html("");
+	//loop through the letters in the $wordList array
+	var tagGoing = "";
+	$.each($wordList, function(idx, elem) {
+  
+	  if (elem == "<") {
+		//if we encountered this symbol it means a tag started
+		tagGoing += elem;
+	  } else if (elem == ">") {
+		//if we encountered this symbol it means a tag closed
+		tagGoing += elem;
+		//create the tag from the collected parts and append it
+		//to the output html:
+		var $foundTag = $(tagGoing).appendTo($all_msg);
+		$foundTag.css({
+		  opacity: 0
+		});
+		$foundTag.delay(idx * 70);
+		$foundTag.animate({
+		  opacity: 1
+		}, 1100);
+  
+		//reset the tag collector:
+		tagGoing = "";
+	  } else {
+		//if we are inside a tag
+		if (tagGoing != "") {
+		  //if we are inside a tag, then just append the
+		  //current character to the output html
+		  tagGoing += elem;
+		} else {
+  
+		  //create a span for the letter and set opacity to 0
+		  var newEL = $("<span/>").text(elem).css({
+			opacity: 0
+		  });
+		  //append it to the welcome message
+		  newEL.appendTo($all_msg);
+		  //set the delay on the animation for this element
+		  newEL.delay(idx * 70);
+		  //animate the opacity back to full 1
+		  newEL.animate({
+			opacity: 1
+		  }, 1100);
+		}
+	  }
+	});
+  
+  };*/

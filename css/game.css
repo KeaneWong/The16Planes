@@ -17,8 +17,6 @@
 	z-index: 3;
 }
 
-
-
 .header {
 	position: absolute;
 	top: 8vh;
@@ -165,3 +163,18 @@ text {
 			  user-select: none; 
 								
   }
+
+
+.CurrentWorld
+{
+	font-family: "Playfair Display";
+	font-weight: 100;
+	font-size: 1.1em;
+	font-style: italic;
+	margin: 0.4em; 
+	padding-left: 1em;
+	position: absolute;
+
+}
+
+
