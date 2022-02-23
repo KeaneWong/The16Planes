@@ -358,7 +358,7 @@ Constellation = function(){
    this.mesh.add(lineVela);
 
    this.mesh.Stars = [];
-   var starGeom = new THREE.BoxGeometry(5,5,5);
+   var starGeom = new THREE.BoxGeometry(2,2,2);
    // create a material; a simple white material will do the trick
    var starMat = new THREE.MeshBasicMaterial({
    	color:0xD5AB55, opacity: 0, transparent: true
@@ -393,8 +393,8 @@ Constellation = function(){
 var constellation;
 function createConstellation(){
 	constellation = new Constellation();
-	constellation.mesh.position.x = 850;
-	constellation.mesh.position.y = 590;
+	constellation.mesh.position.x = 910;
+	constellation.mesh.position.y = 630;
 	constellation.mesh.position.z = -1000;
 	//console.log(constellation.mesh);
 	var constellationScale = 0.7;
@@ -1145,6 +1145,8 @@ function loop(){
 	// call the loop function again
 	requestAnimationFrame(loop);
 
+	SummonArms();
+
 	function updatePlane(){
 		if(idle == false)
 		{
@@ -1242,7 +1244,7 @@ var numberRolled = 21;
 window.addEventListener('load', init, false);
 //jquery section
 $(document).ready(function(){
-	
+	$('#TheUnseen').hide();
 	
     //when we click diceRoller
     $("#diceRoller").click(function(){
@@ -1279,6 +1281,7 @@ function GenerateNumber(){
 	//curPlane = numberRolled;
 	$("#diceRoller").text(numberRolled);
 	$("#diceRoller").css("font-size", 1.5 + "em");
+	console.log("Yo");
 };
 
 function FadeIn (){
@@ -1308,10 +1311,11 @@ function FadeIn (){
 	  }, 1100);
 	});
 	ChangeCreditColor();
+	SummonUnseen();
   };
 
 function ChangeCreditColor(){
-	if(curPlane < 13)
+	if(curPlane < 13 && curPlane!=1 && curPlane !=4)
 	{
 		$("#creditToMe").css("color","#804e52");
 	}
@@ -1321,4 +1325,56 @@ function ChangeCreditColor(){
 	}
 	
 }
+
+var PlaneOfTheUnseen = Math.floor(Math.random()*20)+1;
+console.log("A mysterious being spotted in", Planes[PlaneOfTheUnseen-1].Name);
+//hide by default
+$('#TheUnseen').hide();
+$
+
+function SummonUnseen(){
+	if(curPlane == PlaneOfTheUnseen){
+		$('#TheUnseen').show();
+	}
+	else{
+		$('#TheUnseen').hide();
+	}
+}
+var timeUntilScare = 0;
+var flipped = false;
+function SummonArms()
+{
+	if(curPlane == PlaneOfTheUnseen)
+	{
+		if(timeUntilScare > 0 && timeUntilScare%500 == 0)
+		{
+			if(!flipped)
+			{
+				flipped = true;
+				$('#UnseenArms').css('visibility',"visible");
+			}
+
+		}
+		if(timeUntilScare > 0 && timeUntilScare%500 == 30)
+		{
+			if(flipped)
+			{
+				$('#UnseenArms').css('visibility',"hidden");
+				flipped = false;
+			}
+		}
+		timeUntilScare++;
+	}
+	else{
+		timeUntilScare = 0;
+		if(flipped)
+		{
+			$('#UnseenArms').css('visibility',"hidden");
+			flipped = false;
+		}
+	}
+
+
+}
+
 
