@@ -165,6 +165,20 @@ text {
 								
   }
 
+  .containerOfTheUnseen{
+	  width: 100%;
+
+  }
+
+  .TheUnseen{
+	position: absolute;
+	left:50%; 
+	top: 70%;
+	width: 20em;
+
+  	height: auto;
+	transform:translate(-50%); 
+  }
 
 .CurrentWorld
 {
@@ -179,5 +193,15 @@ text {
 	text-transform: uppercase;
 }
 
+.UnseenArms{
+	position: Absolute;
+	left:50%;
+	transform: translate(-50%);
+
+	height: auto;
+	width: 100%;
+	z-index: 20;
+	visibility: hidden;
+}
 
 
