@@ -1,4 +1,6 @@
-#world{
+
+
+#gameholder{
     position: absolute;
     width: 100%;
     height: 100%;
@@ -6,3 +8,176 @@
     background: linear-gradient(#e4e0ba, #f7d9aa);
     
 }
+
+#world {
+	position: absolute;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	z-index: 3;
+}
+
+.header {
+	position: absolute;
+	top: 8vh;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	pointer-events: none;
+
+	
+}
+.headerContainer
+{
+	display:inline-block;
+	
+}
+
+.headerContainer h2 {
+	font-family: 'Playfair Display';
+	font-size: 4.0em;
+	line-height: .9;
+	margin: 0;
+	color: transparent;
+	text-align: left;
+	
+	
+}
+
+.headerContainer h3 {
+	font-style: italic;
+	font-family: 'Playfair Display';
+	font-size: 1.4em;
+	line-height: 1;
+	margin: 0 0 -.8em 0;
+	padding-left: 1.7em;
+	text-align: left;
+	letter-spacing: -0.025em;
+	color: transparent;
+
+}
+
+.headerContainer h1 {
+	font-family: 'Playfair Display';
+	font-size: 4.7em;
+	line-height: .2em;
+	text-align: left;
+	letter-spacing: -0.025em;
+	color: transparent;
+	margin: 0;
+}
+
+.headerContainer h4{
+	text-align: center;
+	margin: 0.4em 0 0 0;
+	line-height: 1;
+	font-weight: 800;
+	font-family: 'Playfair Display';
+	color: #804e52;
+	text-transform: uppercase;
+}
+
+.titleSVG{
+	height:0.9em;
+	margin-bottom: -0.08em;
+
+}
+
+#diceRoller{
+	font-family: 'Playfair Display';
+	font-weight: 900;
+	font-size: 1em;
+	bottom: 14vh;
+	letter-spacing: 0.2em;
+	display: block;
+	text-align: center;
+	z-index: 10;
+	width: 100%;
+	position: absolute;
+	color:transparent;
+
+	
+}
+
+
+
+path {
+    fill: transparent;
+}
+text {
+    font-family: 'Quintessential', cursive;
+	font-size:1.5em;
+	line-height: 1;
+	margin: 0;
+	letter-spacing: -0.025em;
+	
+	z-index: 10;
+}
+
+
+
+
+.shine {
+	background: #d1b790 linear-gradient(to right, #d1b790, white, #d1b790) 0 0 no-repeat;
+	background-size: 25%;
+	color: #d1b790;
+	-webkit-background-clip: text;
+	background-clip: text;
+	animation-name: shine;
+	animation-duration: 7s;
+	animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px rgba(209, 183, 144, .2);
+}
+@keyframes shine {
+	0%, 10% {
+		background-position: -1000px;
+	}
+	15% {
+		background-position: top left;
+	}
+	90% {
+		background-position: top right + 20px;
+	}
+	100% {
+		background-position: 1000px;
+	}
+}
+.shineGold {
+	background: #FFD700 linear-gradient(to right, #FFD700, white, #FFD700) 0 0 no-repeat;
+	background-size: 25%;
+	color: #FFD700;
+	-webkit-background-clip: text;
+	background-clip: text;
+	animation-name: shine;
+	animation-duration: 7s;
+	animation-iteration-count: infinite;
+	text-shadow: 0 0px 0px rgba(64, 124, 56, 0.2);
+}
+
+
+.noselect {
+	-webkit-touch-callout: none; 
+	  -webkit-user-select: none; 
+	   -khtml-user-select: none; 
+		 -moz-user-select: none; 
+		  -ms-user-select: none; 
+			  user-select: none; 
+								
+  }
+
+
+.CurrentWorld
+{
+	font-family: "Gideon Roman";
+	font-weight: 900;
+	font-size: 1.45em;
+	letter-spacing: 0.1em;
+	margin: 0.4em; 
+	padding-left: 1em;
+	padding-top: 0.3em;
+	position: absolute;
+	text-transform: uppercase;
+}
+
+
+

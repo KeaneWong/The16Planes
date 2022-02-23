@@ -9,12 +9,33 @@
 		<meta name="keywords" content="three.js, webgl, tutorial, game, 3d, animation, airplane, web development, javascript" />
 		<meta name="author" content="Karim Maaloul for Codrops" />
 		<link href='https://fonts.googleapis.com/css?family=Playfair+Display:400,700,700italic' rel='stylesheet' type='text/css'>
-		<link rel="stylesheet" type="text/css" href="css/game.css" />	
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Quintessential&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="css/game.css" />	
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Quintessential&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Gideon+Roman&family=Noto+Serif+Display:wght@100&family=Playfair+Display&family=Quintessential&family=Roboto+Serif:wght@200&display=swap" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script type="text/javascript" src="js/three.min.js"></script>
         <script type="text/javascript" src="js/game.js"></script>
+        <script type="text/javascript" src="js/diceroller.js"></script>
     </head>
     <body>
-        <div id = "world" > </div>
-
+        <div class = 'game-holder' id = "gameholder">
+            <div class = "header" >    
+                <div class = 'headerContainer'>
+                    <h3 class = "shine noselect">180 days</h3>
+                    <h2 class = "shine noselect">Around the</h2>
+                    <h1 class = "shine noselect">W<object data = "Assets/GreatWheelCosmology.png" type = 'image/jpg' class = 'titleSVG' >O</object>RLDS</h1>
+                    <h4 id = "creditToMe">An original Campaign by Keane Wong</h4>
+                </div>
+            
+            </div>
+            <div id = "curWorld" class = "CurrentWorld">
+                Prime Material Plane
+            </div>
+            <div id = "world" > </div>
+            <a id = "diceRoller" class = "shineGold">ROLL</a>
+        </div>
     </body>
 </html>

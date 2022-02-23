@@ -1,0 +1,109 @@
+{ 
+    "Planes" : [
+	
+	{
+		"Name": "Plane of Fire",
+        "color1": "#D74009",
+        "color2": "#EE6B0B"
+	},
+    {
+		"Name": "Plane of Air",
+		"color1": "#CAE35F",
+		"color2": "#DAE35F"
+    },
+    {
+		"Name": "Plane of Water",
+		"color1": "#BBCDD9",
+		"color2": "#CBCDD9"
+    },
+    {
+		"Name": "Plane of Earth",
+		"color1": "#B98378",
+		"color2": "#C98378"
+    },
+    {
+		"Name": "Mechanus",
+		"color1": "#B9A167",
+		"color2": "#C9A167"
+    },
+    {
+		"Name": "Arcadia",
+		"color1": "#9DB569",
+		"color2": "#AdB569"
+	},
+    {
+		"Name": "Mount Celestia",
+		"color1": "#DBDBDB",
+		"color2": "#EBDBDB"
+    },
+    {
+		"Name": "Bytopia",
+		"color1": "#D4AF37",
+		"color2": "#aaa9ad"
+    },
+    {
+		"Name": "Elysium",
+		"color1": "#BCE6FF",
+		"color2": "CCE6FF"
+    },
+    {
+		"Name": "Beastlands",
+		"color1": "#D9D7C7",
+		"color2": "#E9D7C7"
+    },
+    {
+		"Name": "Arborea",
+		"color1": "#957641",
+		"color2": "#A57641"
+	},
+    {
+		"Name": "Ysgard",
+		"color1": "#CEEAEE",
+		"color2": "#DEEAEE"
+    },
+    {
+		"Name": "Limbo",
+		"color1": "#0047ab",
+		"color2": "#301934" 
+    },
+    {
+		"Name": "Pandemonium",
+		"color1": "#0047ab",
+		"color2": "#FFA500."
+    },
+    {
+		"Name": "Abyss",
+		"color1": "#3d492b",
+		"color2": "#47193b"
+    },
+    {
+		"Name": "Carceri",
+		"color1": "#C9C1B5.",
+		"color2": "#D9C1B5."
+	},
+    {
+		"Name": "Hades",
+		"color1": "#7D8A96",
+		"color2": "#*D8A96"
+    },
+    {
+		"Name": "Gehenna",
+		"color1": "#E2E5DE",
+		"color2": "#F2E5DE"
+    },
+    {
+		"Name": "Nine Hells",
+		"color1": "#E71E02",
+		"color2": "#FF4605"
+    },
+    {
+		"Name": "Acheron",
+		"color1": "#2A4C7E",
+		"color2": "#88*C8D"
+    }
+    
+
+
+
+]
+}

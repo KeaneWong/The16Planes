@@ -16,15 +16,166 @@ var Colors = {
 	nightSky: 0x7b8993,
 	nightSkyGradient:0x855988
 };
+var curPlane = 21;
+const Planes = [
+	
+	{
+		Name: "Plane of Fire",
+        color1: "#D74009",
+        color2: "#EE6B0B"
+	},
+    {
+		Name: "Plane of Air",
+		color1: "#CAE35F",
+		color2: "#DAE35F"
+    },
+    {
+		Name: "Plane of Water",
+		color1: "#BBCDD9",
+		color2: "#CBCDD9"
+    },
+    {
+		Name: "Plane of Earth",
+		color1: "#B98378",
+		color2: "#C98378"
+    },
+    {
+		Name: "Mechanus",
+		color1: "#B9A167",
+		color2: "#C9A167"
+    },
+    {
+		Name: "Arcadia",
+		color1: "#9DB569",
+		color2: "#AdB569"
+	},
+    {
+		Name: "Mount Celestia",
+		color1: "#DBDBDB",
+		color2: "#EBDBDB"
+    },
+    {
+		Name: "Bytopia",
+		color1: "#D4AF37",
+		color2: "#aaa9ad"
+    },
+    {
+		Name: "Elysium",
+		color1: "#BCE6FF",
+		color2: "CCE6FF"
+    },
+    {
+		Name: "Beastlands",
+		color1: "#D9D7C7",
+		color2: "#E9D7C7"
+    },
+    {
+		Name: "Arborea",
+		color1: "#957641",
+		color2: "#A57641"
+	},
+    {
+		Name: "Ysgard",
+		color1: "#CEEAEE",
+		color2: "#DEEAEE"
+    },
+    {
+		Name: "Limbo",
+		color1: "#565656",
+		color2: "#c0c0c0" 
+    },
+    {
+		Name: "Pandemonium",
+		color1: "#b5651e",
+		color2: "#39FF14"
+    },
+    {
+		Name: "Abyss",
+		color1: "#3d492b",
+		color2: "#47193b"
+    },
+    {
+		Name: "Carceri",
+		color1: "#C9C1B5.",
+		color2: "#D9C1B5."
+	},
+    {
+		Name: "Hades",
+		color1: "#7D8A96",
+		color2: "#*D8A96"
+    },
+    {
+		Name: "Gehenna",
+		color1: "#E2E5DE",
+		color2: "#F2E5DE"
+    },
+    {
+		Name: "Nine Hells",
+		color1: "#E71E02",
+		color2: "#000000"
+    },
+    {
+		Name: "Acheron",
+		color1: "#2A4C7E",
+		color2: "#888C8D"
+	},
+	{
+		Name: "Home",
+		color1: "#e4e0ba",
+		color2: "#f7d9aa"
+	},
+	
+    
 
+];
 
+const ArgoNavis = [
+	430, -712, 
+	487, -759,
+	424, -777,
+	361, -734,
+	377, -687,
+	456, -634,
+	528, -636,
+	571, -557,
+	569, -403,
+	571, -214,
+	622, -225,
+	650, -252,
+	685, -385,
+	749, -482,
+	697, -552,
+	673, -475,
+	640, -450,
+	571, -403,
+	640, -450,
+	673, -475,
+	697, -552,
+	732, -595,
+	487, -759
 
+];
+const VelaNavis = [
+	432, -453,
+	481, -436,
+	495, -461,
+	550, -491,
+	490, -580,
+	432, -589,
+	373, -591, 
+	264, -585,
+	275, -563,
+	287, -477,
+	374, -427,
+	432, -452
+]
 
-
+var storedNames = JSON.parse(localStorage.getItem("names"));
 
 var scene,
 		camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
-        renderer, container;
+		renderer, container;
+		
 function createScene()
 {
 	HEIGHT = window.innerHeight;
@@ -141,15 +292,17 @@ function UpdateSunCycle()  {
 	//y position is no longer negative 
 	ambientLight.intensity = (0.3 + .2*Math.sin(3.14*shadowLight.position.y/350));
 	ambientLight.color.lerpColors(BackgroundLightNight, BackgroundLightNight, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
-	SunCycleCount+=0.003;
+	SunCycleCount+=0.002;
+
+
+
 	if(SunCycleCount >= 62.8318530718)//resetting because I was originally an C and assembly programmer and paranoid about overflow
 	{
 		SunCycleCount = 0;
 	}
-	var setGradientTop = lerpColor('#7b8993', '#e4e0ba', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
-	var setGradientBottom = lerpColor('#855988','#f7d9aa', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
-	document.getElementById("world").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
-
+	var setGradientTop 		= 	lerpColor('#565d8d',Planes[curPlane-1].color1, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));//changes colors to a different one at nighttime
+	var setGradientBottom 	= 	lerpColor('#777ba3',Planes[curPlane-1].color2, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
+	document.getElementById("gameholder").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
 
 	function lerpColor(a, b, amount) 
 	{ 
@@ -165,7 +318,198 @@ function UpdateSunCycle()  {
 
 }
 
-// First let's define a Sea object :
+
+var MAX_POINTS_ARGO = ArgoNavis.length/2;
+var MAX_POINTS_VELA = VelaNavis.length/2;
+Constellation = function(){
+   this.mesh = new THREE.Object3D();
+   var geometryArgo = new THREE.BufferGeometry();
+   var geometryVela = new THREE.BufferGeometry();
+   var positionsArgo = new Float32Array( MAX_POINTS_ARGO * 3 ); // 3 vertices per point
+   var positionsVela = new Float32Array( MAX_POINTS_VELA * 3 ); // 3 vertices per point
+   geometryArgo.setAttribute( 'position', new THREE.BufferAttribute( positionsArgo, 3 ) );
+   geometryVela.setAttribute( 'position', new THREE.BufferAttribute( positionsVela, 3 ) );
+   var index = 0;
+   var indexA = 0;
+   for(var i = 0; i < MAX_POINTS_ARGO; i++) 
+   {
+	positionsArgo[ index ++ ] = ArgoNavis[indexA++]-500;
+	positionsArgo[ index ++ ] = ArgoNavis[indexA++]+400;
+	positionsArgo[ index ++ ] = 0;	//z is on coordinate 0 always
+   }
+   index = 0;
+   indexA = 0;
+   for(var i = 0; i < MAX_POINTS_VELA; i++) 
+   {
+	positionsVela[ index ++ ] = VelaNavis[indexA++]-500;
+	positionsVela[ index ++ ] = VelaNavis[indexA++]+400;
+	positionsVela[ index ++ ] = 0;	//z is on coordinate 0 always
+   }
+   // material
+   var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
+   geometryArgo.setDrawRange( 0, MAX_POINTS_ARGO );
+   // line
+   lineArgo = new THREE.Line( geometryArgo,  material );
+   var drawCount = 1;
+   lineVela = new THREE.Line( geometryVela,  material );
+   //console.log(geometryArgo);
+   //console.log(geometryVela);
+   this.mesh.add(lineArgo);
+   this.mesh.add(lineVela);
+
+   this.mesh.Stars = [];
+   var starGeom = new THREE.BoxGeometry(5,5,5);
+   // create a material; a simple white material will do the trick
+   var starMat = new THREE.MeshBasicMaterial({
+   	color:0xD5AB55, opacity: 0, transparent: true
+   });
+   indexA = 0;
+   count = 0;
+   for(var i = 0; i < MAX_POINTS_ARGO; i++)
+   {
+		var s = new THREE.Mesh(starGeom, starMat);
+		s.position.x = positionsArgo[indexA++];
+		s.position.y = positionsArgo[indexA++];
+		s.position.z = positionsArgo[indexA++];
+		this.mesh.Stars[i] = s;
+		this.mesh.add(s);
+		count++;
+   }
+   indexA = 0;
+   for(var i = 0; i < MAX_POINTS_VELA; i++)
+   {
+		var s = new THREE.Mesh(starGeom, starMat);
+		s.position.x = VelaNavis[indexA++]-500;
+		s.position.y = VelaNavis[indexA++]+400;
+		s.position.z = 0;
+		this.mesh.Stars[i+MAX_POINTS_ARGO] = s;
+		//console.log(this.mesh.Stars);
+		this.mesh.add(s);
+		count++
+   }
+   //console.log(MAX_POINTS_ARGO,MAX_POINTS_VELA);
+   //console.log("COUNT IS : ", count);
+}
+var constellation;
+function createConstellation(){
+	constellation = new Constellation();
+	constellation.mesh.position.x = 850;
+	constellation.mesh.position.y = 590;
+	constellation.mesh.position.z = -1000;
+	//console.log(constellation.mesh);
+	var constellationScale = 0.7;
+	constellation.mesh.scale.set(constellationScale,constellationScale ,constellationScale);
+	//console.log(constellation.mesh.children[0].geometry)
+	constellation.mesh.children[0].geometry.setDrawRange(0,0);
+	constellation.mesh.children[1].geometry.setDrawRange(0,0);
+	scene.add(constellation.mesh);
+	
+
+}
+
+
+inStarAnimation = false;
+var Starindex = 0;
+var StarDrawRange = 0;
+var finishedFadeIn = false;
+var lingerTimer = 0;
+var StarDrawRangeBegin = 0;
+Constellation.prototype.FadeInStars = function() {
+	//ensures that this only happens during the nighttime, aka when the count is on a cycle of pi but not 2pi
+	if((Math.cos(SunCycleCount).toFixed(1) == -1 && SunCycleCount>0))
+	{
+		inStarAnimation = true;
+	}
+	if(inStarAnimation)
+	{
+		var stars = this.mesh.Stars;
+		//console.log(Starindex);
+		if(!finishedFadeIn)
+		{
+			if(Starindex<stars.length){
+				stars[Starindex].material.transparent = false;
+				stars[Starindex].material.opacity+=0.015;
+				stars[Starindex].material.needsUpdate = true;
+				//console.log(stars[Starindex]);
+	
+				if(stars[Starindex].material.opacity>=1)
+				{
+					Starindex++;
+				}
+			}
+			//a sign that all the stars have rendered
+			else if(Starindex>=stars.length && StarDrawRange < MAX_POINTS_ARGO+1){
+				StarDrawRange+=0.15;
+				this.mesh.children[0].geometry.setDrawRange(StarDrawRangeBegin, Math.floor(StarDrawRange));
+				this.mesh.children[0].geometry.needsUpdate = true;
+				
+			}	//setting draw range for velanavis
+			else if (Starindex>=stars.length && StarDrawRange > MAX_POINTS_ARGO && StarDrawRange < MAX_POINTS_ARGO+MAX_POINTS_VELA+1){
+				StarDrawRange+=0.15;
+				this.mesh.children[1].geometry.setDrawRange(StarDrawRangeBegin, Math.floor(StarDrawRange) - MAX_POINTS_ARGO);
+				this.mesh.children[1].geometry.needsUpdate = true;
+				
+			}
+			else if(StarDrawRange >= MAX_POINTS_ARGO + MAX_POINTS_VELA){
+				finishedFadeIn = true;
+				lingerTimer = 0;
+				console.log("Benchmakr1");
+			}	
+		}
+		//console.log("Yp",lingerTimer);
+		//console.log(inStarAnimation);
+		if(finishedFadeIn)
+		{
+			//this if statement makes it so that whatever is inside is only run once.
+			//console.log("Whatup");
+			if(lingerTimer > 400)
+			{
+				//console.log("Ye");
+				for(var i = 0; i < stars.length;i++)
+				{
+					stars[i].material.opacity-=0.0002;
+					stars[i].material.needsUpdate = true; 
+					if(StarDrawRangeBegin < MAX_POINTS_ARGO)
+					{
+						
+						this.mesh.children[0].geometry.setDrawRange(Math.floor(StarDrawRangeBegin), MAX_POINTS_ARGO-StarDrawRangeBegin);
+						this.mesh.children[0].geometry.needsUpdate = true;
+						StarDrawRangeBegin += 0.008;
+						
+					}
+					else if (StarDrawRangeBegin >= MAX_POINTS_ARGO && StarDrawRangeBegin < (MAX_POINTS_ARGO+MAX_POINTS_VELA+1))
+					{
+						console.log(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO));
+						this.mesh.children[1].geometry.setDrawRange(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO), MAX_POINTS_ARGO+MAX_POINTS_VELA-StarDrawRangeBegin);
+						this.mesh.children[1].geometry.needsUpdate = true;
+						StarDrawRangeBegin += 0.008;
+					}
+				}
+				
+				if(stars[0].material.opacity <= 0)
+				{
+					console.log("Done")
+					//console.log(StarDrawRangeBegin, MAX_POINTS_ARGO,StarDrawRangeBegin>= MAX_POINTS_ARGO, StarDrawRangeBegin<( (MAX_POINTS_ARGO+MAX_POINTS_VELA+1)));
+					inStarAnimation = false;//flag to trip the fade out animation is done
+					lingerTimer=0;
+					Starindex = 0;
+					StarDrawRange = 0;
+					StarDrawRangeBegin = 0;
+					finishedFadeIn = false;
+				}
+			}
+			else{
+				
+				lingerTimer++;
+			}
+			
+			
+		}
+	}
+}
+
+
+
 Sea = function(){
 	var geom = new THREE.CylinderBufferGeometry(600,600,800,40,10);
 	geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
@@ -212,7 +556,7 @@ Sea = function(){
 
 // now we create the function that will be called in each frame 
 // to update the position of the vertices to simulate the waves
-
+var extraSpeed = 0;
 Sea.prototype.moveWaves = function (){
 	
 	// get the vertices
@@ -244,13 +588,21 @@ Sea.prototype.moveWaves = function (){
 	this.mesh.geometry.attributes.position.needsUpdate=true;
 
 
-	sea.mesh.rotation.z += .005;
+	if(idle)
+	{
+		extraSpeed = normalize(mousePosNormed.x,-.5,.5,-0.001, 0.0024);
+		sea.mesh.rotation.z += .003 + extraSpeed;
+	}
+	else
+	{
+		extraSpeed = normalize(mousePosNormed.x,-.5,.5,-0.001, 0.0024);
+		sea.mesh.rotation.z += .005+extraSpeed;	
+	}
+	
 }
 
 // Instantiate the sea and add it to the scene:
-
 var sea;
-
 function createSea(){
 	sea = new Sea();
 
@@ -570,9 +922,109 @@ function createPlane(){
 }
 
 
+var DieRoll = function(){
+	this.mesh = new THREE.Object3D(); 
+	var geometryDie = new THREE.IcosahedronBufferGeometry(10, 0);
+	var matDie = new THREE.MeshLambertMaterial({color:Colors.red});
+	var Die = new THREE.Mesh(geometryDie, matDie);
+	//console.log(this.mesh.geometry.attributes.position.array);
+	this.mesh.add(Die);
+
+}
+
+var die;
+var faceNormalsArray;
+function createDie(){
+	die = new DieRoll();
+	die.mesh.position.y = 60;
+	die.mesh.position.x = 0;
+	die.mesh.position.z = 100;
+	//console.log(die.mesh.children[0].geometry.attributes.normal.array);
+	faceNormalsArray = die.mesh.children[0].geometry.attributes.normal.array;
+	scene.add(die.mesh);
+
+}
+
+
+var hasBeenRolled = false;
+var isRolling = false;
+var displayNumber = false;
+var isSelected = false;
+var targetQuaternion = new THREE.Quaternion();
+var rotationMatrix = new THREE.Matrix4();
+//object used to track where we are in animation between loops
+var dieAnimationFlags = {inRandomPhase: false, inInterpolationPhase: false};
+const rollSpeed = 2;
+var normal = new THREE.Vector3();
+const clock = new THREE.Clock();
+
+function rollDie(){
+	//if flag to roll is on, send flag to remove previous number,
+	//then randomly pick a face calculate the quaternion associated with it 
+	//interpolate towards the chosen face at some speed
+	//stop and flip animation 'isrolling' flag, then flip the flag to display new number
+	const delta = clock.getDelta();
+	if(hasBeenRolled){
+		if(isRolling)
+		{
+			//you dont want to calculate quaternionss every frame, it gets costly
+			if(!isSelected)
+			{
+				let chosenFaceIndex = Math.floor(Math.random()*20);
+				//console.log(die.mesh.children[0]);
+			
+
+				//let randomPlace = new THREE.Vector3(-1+2*Math.random(), -1+2*Math.random(), -1+2*Math.random());
+				//randomPlace.normalize();
+				var chosenFaceNormal = new THREE.Vector3( faceNormalsArray[chosenFaceIndex*9],faceNormalsArray[chosenFaceIndex*9+1] , faceNormalsArray[chosenFaceIndex*9+2] );
+				var vectorTowardsCamera = new THREE.Vector3(0,0.5,1);
+				vectorTowardsCamera.normalize();
+				targetQuaternion.setFromUnitVectors(chosenFaceNormal , vectorTowardsCamera);
+				isSelected = true;
+			}
+			if ( ! die.mesh.quaternion.equals( targetQuaternion ) ) {
+
+				const step = rollSpeed * delta;
+				die.mesh.quaternion.rotateTowards( targetQuaternion, step );
+
+			}
+			else{
+				//set isRolling to false. makes sure we reset flag for next time
+				isRolling = false;
+				animationdone = true;
+				
+				$("#diceRoller").animate({
+					opacity: 1.0
+				}, 1000, function(){
+					//console.log(Planes[curPlane-1]);
+					curPlane = numberRolled;
+					FadeIn();
+				});
+			}
+
+		}	
+		else{
+			//after we're done rolling we wanna flag the chosenface
+			isSelected = false;
+		}
+	}
+	else{
+		//idle animation while waiting for the very first roll
+		die.mesh.rotation.y += .01;
+	}
+	
+}
+
+
+
 var mousePos = {x:0, y:0};
+var mousePosNormed = {x: 0, y: 0};
 var clickPos = {x:0, y:0};
 
+const cameraFarPos = 500;
+const cameraNearPos = 150;
+const planeMinSpeed=1.2;
+const planeMaxSpeed=1.6;
 // now handle the mousemove event
 
 function handleMouseMove(event) {
@@ -593,26 +1045,41 @@ function handleMouseMove(event) {
 var idle = true;
 var idleAnimationCount = 0;
 function handleClick(event) {
-	if(idle == false)
+	onDiceRoll = false;
+	$("#diceRoller").click(isOnDiceRoll);
+	if(!onDiceRoll)
 	{
-		//flag indicates that the idle animation is now on and that the boat must be put into a bobbing animation
-		idle = true;
-		idleAnimationCount = 0;
-		clickPos.x = -1 + (event.clientX / WIDTH)*2;
-		clickPos.y =  1 - (event.clientY / HEIGHT)*2;
-	}
-	else{
-		idle = false;
-		
+		if(idle == false)
+		{
+			//flag indicates that the idle animation is now on and that the boat must be put into a bobbing animation
+			idle = true;
+			idleAnimationCount = 0;
+			clickPos.x = -1 + (event.clientX / WIDTH)*2;
+			clickPos.y =  1 - (event.clientY / HEIGHT)*2;
 
+		}
+		else{
+
+
+			idle = false;
+
+			
+
+		}
 	}
+
+}
+var onDiceRoll = false;
+function isOnDiceRoll(){
+	onDiceRoll = true;
 }
 
 
 function followMouse(){
 	var targetX = normalize(mousePos.x, -1, 1, -100, 100);
 	var targetY = normalize(mousePos.y, -1, 1, 25, 175);
-	
+	mousePosNormed.x = targetX;
+	mousePosNormed.y = targetY;
 
 	return {targetX,targetY};
 }
@@ -647,18 +1114,29 @@ var flipCount = 2*3.14;
 const mushCapOriginalColor = new THREE.Color(Colors.mossGreen);
 const mushCapChangeColor = new THREE.Color(Colors.oliveGreen);
 function loop(){
-	// Rotate the propeller, the sea and the sky
-	//airplane.propeller.rotation.x += 0.3;
-	//sea.mesh.rotation.z += .004;
+	
+
 	
 	sea.moveWaves();
-	sky.mesh.rotation.z += .008;
+	if(idle)
+	{
+		sky.mesh.rotation.z+=.005;
+	}
+	else
+	{
+		sky.mesh.rotation.z += .008;
+	}
+	
+	constellation.FadeInStars();
 
 	//update the sun
 	UpdateSunCycle();
 
 	// update the plane on each frame
 	updatePlane();
+
+	//mess with the die
+	rollDie();
 
 	// render the scene
 	renderer.render(scene, camera);
@@ -673,6 +1151,7 @@ function loop(){
 			targetCoord = followMouse();
 			targetX = targetCoord.targetX;
 			targetY = targetCoord.targetY;
+			
 		}
 		else
 		{
@@ -681,6 +1160,8 @@ function loop(){
 			targetY = targetCoord.targetY;
 		}
 		
+		
+
 		// update the airplane's position, we use a different targetx and targety depending on whether we clicked or not
 		// Move the plane at each frame by adding a fraction of the remaining distance
 		airplane.mesh.position.y += (targetY-airplane.mesh.position.y)*0.035;
@@ -689,16 +1170,17 @@ function loop(){
 		airplane.mesh.rotation.z = (targetY-airplane.mesh.position.y)*0.0090;
 		airplane.mesh.rotation.x = (airplane.mesh.position.y-targetY)*0.0050;
 
-
-
-		airplane.propeller.rotation.x += 0.4;
+		//propeller animation. Extraspeed is between -0.0012 and 0.0024
+		let propellerExtraSpeed = extraSpeed * 100;
+		airplane.propeller.rotation.x += 0.4 + propellerExtraSpeed;
 
 		if(flip)
 		{
-			flipCount += 0.02;	
-			airplane.mushCap.scale.set(Math.sin(flipCount)/15+1, 1, Math.sin(flipCount)/15+1);	
+			flipCount += 0.015;	
+			airplane.mushCap.scale.set(Math.sin(flipCount)/7+1.1, 1, Math.sin(flipCount)/7+1.1);	
 			//airplane.mushCap.material.color.setHex(mushCapOriginalColor + flipCount*0x10);
-			airplane.mushCap.material.color.lerpColors(mushCapOriginalColor, mushCapChangeColor , (1+Math.sin(flipCount))/2 );
+			airplane.mushCap.material.color.lerpColors(mushCapOriginalColor, mushCapChangeColor , (0.5+Math.sin(flipCount)/2) );
+			
 			if(airplane.mushCap.position.y > 2*3.14)
 			{
 				flip = false;
@@ -706,10 +1188,10 @@ function loop(){
 		}
 		else
 		{
-			flipCount -= 0.02;
-			airplane.mushCap.scale.set(Math.sin(flipCount)/15+1, 1 , Math.sin(flipCount)/15+1);
+			flipCount -= 0.015;
+			airplane.mushCap.scale.set(Math.sin(flipCount)/7+1.1, 1 , Math.sin(flipCount)/7+1.1);
 			//airplane.mushCap.material.color.setHex(mushCapOriginalColor + flipCount*0x10);
-			airplane.mushCap.material.color.lerpColors(mushCapChangeColor ,mushCapOriginalColor , (1+Math.sin(flipCount))/2);
+			airplane.mushCap.material.color.lerpColors(mushCapChangeColor ,mushCapOriginalColor , (0.5+Math.sin(flipCount)/2));
 			if(airplane.mushCap.position.y < -2*3.14)
 			{
 				flip = true;
@@ -735,12 +1217,19 @@ function init()
 
     createSea();
 
-    createSky();
+	createSky();
+	
+	createDie(); //'die' meaning singular dice
+
+	createConstellation();
 
 	//add the listener
 	document.addEventListener('mousemove', handleMouseMove, false);
 
-	document.addEventListener('click', handleClick, false);
+	//leave it as mouseup, click causes the idle animation while rolling to bug out as it registers click
+	//as 2 separate events
+
+	document.addEventListener('mouseup', handleClick, false);
 
 
 
@@ -748,5 +1237,88 @@ function init()
     loop();
 	
 };
+var numberRolled = 21;
 
 window.addEventListener('load', init, false);
+//jquery section
+$(document).ready(function(){
+	
+	
+    //when we click diceRoller
+    $("#diceRoller").click(function(){
+
+		//console.log("What");
+		//this idle = !idle line keeps the ship from flipflopping when pressing roll button
+		idle = !idle;
+		$("#diceRoller").animate({
+			opacity: 0
+		}, 200, GenerateNumber);
+		if(hasBeenRolled == false)
+		{
+			hasBeenRolled = true;
+		}
+		if(isRolling == false)
+		{
+			isRolling = true;
+		}
+		
+		//turning opacity to 0 while we change the insides
+		$('#curWorld').animate({
+			opacity:0
+		}, 200);
+
+		
+
+	});
+  });
+
+
+function GenerateNumber(){
+	// will be called when all the animations on the queue finish
+	numberRolled = 1+Math.floor(Math.random()*20);//between 1 and 20
+	//curPlane = numberRolled;
+	$("#diceRoller").text(numberRolled);
+	$("#diceRoller").css("font-size", 1.5 + "em");
+};
+
+function FadeIn (){
+
+	var $all_msg = $('#curWorld');
+
+	//turning opacity back to 1. it will be transparent otherwise
+	jQuery('#curWorld').css('opacity', '1');
+
+	var $wordList = Planes[curPlane-1].Name.split("");
+
+	$('#curWorld').text("");
+
+	//loop through the letters in the $wordList array
+	$.each($wordList, function(idx, elem) {
+	  //create a span for the letter and set opacity to 0
+	  var newEL = $("<span/>").text(elem).css({
+		opacity: 0
+	  });
+	  //append it to the welcome message
+	  newEL.appendTo($all_msg);
+	  //set the delay on the animation for this element
+	  newEL.delay(idx * 90);
+	  //animate the opacity back to full 1
+	  newEL.animate({
+		opacity: 1
+	  }, 1100);
+	});
+	ChangeCreditColor();
+  };
+
+function ChangeCreditColor(){
+	if(curPlane < 13)
+	{
+		$("#creditToMe").css("color","#804e52");
+	}
+	else
+	{
+		$("#creditToMe").css("color","#c0c0c0");
+	}
+	
+}
+
