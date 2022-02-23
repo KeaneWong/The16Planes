@@ -112,7 +112,7 @@ const Planes = [
     {
 		Name: "Nine Hells",
 		color1: "#E71E02",
-		color2: "#FF4605"
+		color2: "#000000"
     },
     {
 		Name: "Acheron",
@@ -416,7 +416,7 @@ var lingerTimer = 0;
 var StarDrawRangeBegin = 0;
 Constellation.prototype.FadeInStars = function() {
 	//ensures that this only happens during the nighttime, aka when the count is on a cycle of pi but not 2pi
-	if(SunCycleCount.toFixed(2)%3.14 == 0  && SunCycleCount.toFixed(2)%6.28 != 0 && SunCycleCount>0)
+	if((Math.cos(SunCycleCount).toFixed(1) == -1 && SunCycleCount>0))
 	{
 		inStarAnimation = true;
 	}
