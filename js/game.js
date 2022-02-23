@@ -1301,7 +1301,7 @@ function FadeIn (){
 	  //append it to the welcome message
 	  newEL.appendTo($all_msg);
 	  //set the delay on the animation for this element
-	  newEL.delay(idx * 70);
+	  newEL.delay(idx * 90);
 	  //animate the opacity back to full 1
 	  newEL.animate({
 		opacity: 1
