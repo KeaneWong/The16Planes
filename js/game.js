@@ -81,13 +81,13 @@ const Planes = [
     },
     {
 		Name: "Limbo",
-		color1: "#0047ab",
-		color2: "#301934" 
+		color1: "#565656",
+		color2: "#c0c0c0" 
     },
     {
 		Name: "Pandemonium",
-		color1: "#0047ab",
-		color2: "#FFA500."
+		color1: "#b5651e",
+		color2: "#39FF14"
     },
     {
 		Name: "Abyss",
@@ -129,7 +129,46 @@ const Planes = [
 
 ];
 
+const ArgoNavis = [
+	430, -712, 
+	487, -759,
+	424, -777,
+	361, -734,
+	377, -687,
+	456, -634,
+	528, -636,
+	571, -557,
+	569, -403,
+	571, -214,
+	622, -225,
+	650, -252,
+	685, -385,
+	749, -482,
+	697, -552,
+	673, -475,
+	640, -450,
+	571, -403,
+	640, -450,
+	673, -475,
+	697, -552,
+	732, -595,
+	487, -759
 
+];
+const VelaNavis = [
+	432, -453,
+	481, -436,
+	495, -461,
+	550, -491,
+	490, -580,
+	432, -589,
+	373, -591, 
+	264, -585,
+	275, -563,
+	287, -477,
+	374, -427,
+	432, -452
+]
 
 var storedNames = JSON.parse(localStorage.getItem("names"));
 
@@ -254,12 +293,15 @@ function UpdateSunCycle()  {
 	ambientLight.intensity = (0.3 + .2*Math.sin(3.14*shadowLight.position.y/350));
 	ambientLight.color.lerpColors(BackgroundLightNight, BackgroundLightNight, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
 	SunCycleCount+=0.002;
+
+
+
 	if(SunCycleCount >= 62.8318530718)//resetting because I was originally an C and assembly programmer and paranoid about overflow
 	{
 		SunCycleCount = 0;
 	}
-	var setGradientTop 		= 	lerpColor(Planes[curPlane-1].color1,  '#98eff9', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));//changes colors to a different one at nighttime
-	var setGradientBottom 	= 	lerpColor(Planes[curPlane-1].color2,  '#a8eff9', 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
+	var setGradientTop 		= 	lerpColor('#565d8d',Planes[curPlane-1].color1, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));//changes colors to a different one at nighttime
+	var setGradientBottom 	= 	lerpColor('#777ba3',Planes[curPlane-1].color2, 0.5-0.5*Math.sin(-3.14*shadowLight.position.y/350));
 	document.getElementById("gameholder").style.background = 'linear-gradient(' + setGradientTop + ',' + setGradientBottom+')';
 
 	function lerpColor(a, b, amount) 
@@ -276,7 +318,198 @@ function UpdateSunCycle()  {
 
 }
 
-// First let's define a Sea object :
+
+var MAX_POINTS_ARGO = ArgoNavis.length/2;
+var MAX_POINTS_VELA = VelaNavis.length/2;
+Constellation = function(){
+   this.mesh = new THREE.Object3D();
+   var geometryArgo = new THREE.BufferGeometry();
+   var geometryVela = new THREE.BufferGeometry();
+   var positionsArgo = new Float32Array( MAX_POINTS_ARGO * 3 ); // 3 vertices per point
+   var positionsVela = new Float32Array( MAX_POINTS_VELA * 3 ); // 3 vertices per point
+   geometryArgo.setAttribute( 'position', new THREE.BufferAttribute( positionsArgo, 3 ) );
+   geometryVela.setAttribute( 'position', new THREE.BufferAttribute( positionsVela, 3 ) );
+   var index = 0;
+   var indexA = 0;
+   for(var i = 0; i < MAX_POINTS_ARGO; i++) 
+   {
+	positionsArgo[ index ++ ] = ArgoNavis[indexA++]-500;
+	positionsArgo[ index ++ ] = ArgoNavis[indexA++]+400;
+	positionsArgo[ index ++ ] = 0;	//z is on coordinate 0 always
+   }
+   index = 0;
+   indexA = 0;
+   for(var i = 0; i < MAX_POINTS_VELA; i++) 
+   {
+	positionsVela[ index ++ ] = VelaNavis[indexA++]-500;
+	positionsVela[ index ++ ] = VelaNavis[indexA++]+400;
+	positionsVela[ index ++ ] = 0;	//z is on coordinate 0 always
+   }
+   // material
+   var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
+   geometryArgo.setDrawRange( 0, MAX_POINTS_ARGO );
+   // line
+   lineArgo = new THREE.Line( geometryArgo,  material );
+   var drawCount = 1;
+   lineVela = new THREE.Line( geometryVela,  material );
+   //console.log(geometryArgo);
+   //console.log(geometryVela);
+   this.mesh.add(lineArgo);
+   this.mesh.add(lineVela);
+
+   this.mesh.Stars = [];
+   var starGeom = new THREE.BoxGeometry(5,5,5);
+   // create a material; a simple white material will do the trick
+   var starMat = new THREE.MeshBasicMaterial({
+   	color:0xD5AB55, opacity: 0, transparent: true
+   });
+   indexA = 0;
+   count = 0;
+   for(var i = 0; i < MAX_POINTS_ARGO; i++)
+   {
+		var s = new THREE.Mesh(starGeom, starMat);
+		s.position.x = positionsArgo[indexA++];
+		s.position.y = positionsArgo[indexA++];
+		s.position.z = positionsArgo[indexA++];
+		this.mesh.Stars[i] = s;
+		this.mesh.add(s);
+		count++;
+   }
+   indexA = 0;
+   for(var i = 0; i < MAX_POINTS_VELA; i++)
+   {
+		var s = new THREE.Mesh(starGeom, starMat);
+		s.position.x = VelaNavis[indexA++]-500;
+		s.position.y = VelaNavis[indexA++]+400;
+		s.position.z = 0;
+		this.mesh.Stars[i+MAX_POINTS_ARGO] = s;
+		//console.log(this.mesh.Stars);
+		this.mesh.add(s);
+		count++
+   }
+   //console.log(MAX_POINTS_ARGO,MAX_POINTS_VELA);
+   //console.log("COUNT IS : ", count);
+}
+var constellation;
+function createConstellation(){
+	constellation = new Constellation();
+	constellation.mesh.position.x = 850;
+	constellation.mesh.position.y = 590;
+	constellation.mesh.position.z = -1000;
+	//console.log(constellation.mesh);
+	var constellationScale = 0.7;
+	constellation.mesh.scale.set(constellationScale,constellationScale ,constellationScale);
+	//console.log(constellation.mesh.children[0].geometry)
+	constellation.mesh.children[0].geometry.setDrawRange(0,0);
+	constellation.mesh.children[1].geometry.setDrawRange(0,0);
+	scene.add(constellation.mesh);
+	
+
+}
+
+
+inStarAnimation = false;
+var Starindex = 0;
+var StarDrawRange = 0;
+var finishedFadeIn = false;
+var lingerTimer = 0;
+var StarDrawRangeBegin = 0;
+Constellation.prototype.FadeInStars = function() {
+	//ensures that this only happens during the nighttime, aka when the count is on a cycle of pi but not 2pi
+	if(SunCycleCount.toFixed(2)%3.14 == 0  && SunCycleCount.toFixed(2)%6.28 != 0 && SunCycleCount>0)
+	{
+		inStarAnimation = true;
+	}
+	if(inStarAnimation)
+	{
+		var stars = this.mesh.Stars;
+		//console.log(Starindex);
+		if(!finishedFadeIn)
+		{
+			if(Starindex<stars.length){
+				stars[Starindex].material.transparent = false;
+				stars[Starindex].material.opacity+=0.015;
+				stars[Starindex].material.needsUpdate = true;
+				//console.log(stars[Starindex]);
+	
+				if(stars[Starindex].material.opacity>=1)
+				{
+					Starindex++;
+				}
+			}
+			//a sign that all the stars have rendered
+			else if(Starindex>=stars.length && StarDrawRange < MAX_POINTS_ARGO+1){
+				StarDrawRange+=0.15;
+				this.mesh.children[0].geometry.setDrawRange(StarDrawRangeBegin, Math.floor(StarDrawRange));
+				this.mesh.children[0].geometry.needsUpdate = true;
+				
+			}	//setting draw range for velanavis
+			else if (Starindex>=stars.length && StarDrawRange > MAX_POINTS_ARGO && StarDrawRange < MAX_POINTS_ARGO+MAX_POINTS_VELA+1){
+				StarDrawRange+=0.15;
+				this.mesh.children[1].geometry.setDrawRange(StarDrawRangeBegin, Math.floor(StarDrawRange) - MAX_POINTS_ARGO);
+				this.mesh.children[1].geometry.needsUpdate = true;
+				
+			}
+			else if(StarDrawRange >= MAX_POINTS_ARGO + MAX_POINTS_VELA){
+				finishedFadeIn = true;
+				lingerTimer = 0;
+				console.log("Benchmakr1");
+			}	
+		}
+		//console.log("Yp",lingerTimer);
+		//console.log(inStarAnimation);
+		if(finishedFadeIn)
+		{
+			//this if statement makes it so that whatever is inside is only run once.
+			//console.log("Whatup");
+			if(lingerTimer > 400)
+			{
+				//console.log("Ye");
+				for(var i = 0; i < stars.length;i++)
+				{
+					stars[i].material.opacity-=0.0002;
+					stars[i].material.needsUpdate = true; 
+					if(StarDrawRangeBegin < MAX_POINTS_ARGO)
+					{
+						
+						this.mesh.children[0].geometry.setDrawRange(Math.floor(StarDrawRangeBegin), MAX_POINTS_ARGO-StarDrawRangeBegin);
+						this.mesh.children[0].geometry.needsUpdate = true;
+						StarDrawRangeBegin += 0.008;
+						
+					}
+					else if (StarDrawRangeBegin >= MAX_POINTS_ARGO && StarDrawRangeBegin < (MAX_POINTS_ARGO+MAX_POINTS_VELA+1))
+					{
+						console.log(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO));
+						this.mesh.children[1].geometry.setDrawRange(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO), MAX_POINTS_ARGO+MAX_POINTS_VELA-StarDrawRangeBegin);
+						this.mesh.children[1].geometry.needsUpdate = true;
+						StarDrawRangeBegin += 0.008;
+					}
+				}
+				
+				if(stars[0].material.opacity <= 0)
+				{
+					console.log("Done")
+					//console.log(StarDrawRangeBegin, MAX_POINTS_ARGO,StarDrawRangeBegin>= MAX_POINTS_ARGO, StarDrawRangeBegin<( (MAX_POINTS_ARGO+MAX_POINTS_VELA+1)));
+					inStarAnimation = false;//flag to trip the fade out animation is done
+					lingerTimer=0;
+					Starindex = 0;
+					StarDrawRange = 0;
+					StarDrawRangeBegin = 0;
+					finishedFadeIn = false;
+				}
+			}
+			else{
+				
+				lingerTimer++;
+			}
+			
+			
+		}
+	}
+}
+
+
+
 Sea = function(){
 	var geom = new THREE.CylinderBufferGeometry(600,600,800,40,10);
 	geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
@@ -323,8 +556,6 @@ Sea = function(){
 
 // now we create the function that will be called in each frame 
 // to update the position of the vertices to simulate the waves
-
-
 var extraSpeed = 0;
 Sea.prototype.moveWaves = function (){
 	
@@ -371,9 +602,7 @@ Sea.prototype.moveWaves = function (){
 }
 
 // Instantiate the sea and add it to the scene:
-
 var sea;
-
 function createSea(){
 	sea = new Sea();
 
@@ -898,6 +1127,7 @@ function loop(){
 		sky.mesh.rotation.z += .008;
 	}
 	
+	constellation.FadeInStars();
 
 	//update the sun
 	UpdateSunCycle();
@@ -991,6 +1221,8 @@ function init()
 	
 	createDie(); //'die' meaning singular dice
 
+	createConstellation();
+
 	//add the listener
 	document.addEventListener('mousemove', handleMouseMove, false);
 
@@ -1030,6 +1262,7 @@ $(document).ready(function(){
 			isRolling = true;
 		}
 		
+		//turning opacity to 0 while we change the insides
 		$('#curWorld').animate({
 			opacity:0
 		}, 200);
@@ -1048,20 +1281,15 @@ function GenerateNumber(){
 	$("#diceRoller").css("font-size", 1.5 + "em");
 };
 
-//Important: Sets the name of the plane and then fades in. Is called once new dice roll is done with animation
-
 function FadeIn (){
 
-	//get the welcome msg element
 	var $all_msg = $('#curWorld');
 
+	//turning opacity back to 1. it will be transparent otherwise
 	jQuery('#curWorld').css('opacity', '1');
 
-	//get a list of letters from the welcome text
-	//var $wordList = $('#curWorld').text().split("");
 	var $wordList = Planes[curPlane-1].Name.split("");
 
-	//clear the welcome text msg
 	$('#curWorld').text("");
 
 	//loop through the letters in the $wordList array
@@ -1081,60 +1309,3 @@ function FadeIn (){
 	});
   };
 
-  /*
-  function FadeIn() {
-	//get the welcome msg element
-	var $all_msg = $('#curWorld');
-	//get a list of letters from the welcome text
-	//var $wordList = $('#curWorld').html().split("");
-	var $wordList = Planes[curPlane-1].Name.split("");
-	//clear the welcome text msg
-	$('#curWorld').html("");
-	//loop through the letters in the $wordList array
-	var tagGoing = "";
-	$.each($wordList, function(idx, elem) {
-  
-	  if (elem == "<") {
-		//if we encountered this symbol it means a tag started
-		tagGoing += elem;
-	  } else if (elem == ">") {
-		//if we encountered this symbol it means a tag closed
-		tagGoing += elem;
-		//create the tag from the collected parts and append it
-		//to the output html:
-		var $foundTag = $(tagGoing).appendTo($all_msg);
-		$foundTag.css({
-		  opacity: 0
-		});
-		$foundTag.delay(idx * 70);
-		$foundTag.animate({
-		  opacity: 1
-		}, 1100);
-  
-		//reset the tag collector:
-		tagGoing = "";
-	  } else {
-		//if we are inside a tag
-		if (tagGoing != "") {
-		  //if we are inside a tag, then just append the
-		  //current character to the output html
-		  tagGoing += elem;
-		} else {
-  
-		  //create a span for the letter and set opacity to 0
-		  var newEL = $("<span/>").text(elem).css({
-			opacity: 0
-		  });
-		  //append it to the welcome message
-		  newEL.appendTo($all_msg);
-		  //set the delay on the animation for this element
-		  newEL.delay(idx * 70);
-		  //animate the opacity back to full 1
-		  newEL.animate({
-			opacity: 1
-		  }, 1100);
-		}
-	  }
-	});
-  
-  };*/

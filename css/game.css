@@ -167,14 +167,16 @@ text {
 
 .CurrentWorld
 {
-	font-family: "Playfair Display";
-	font-weight: 100;
-	font-size: 1.1em;
-	font-style: italic;
+	font-family: "Noto Serif Display";
+	font-weight: 900;
+	font-size: 1.3em;
+	letter-spacing: 0.1em;
 	margin: 0.4em; 
 	padding-left: 1em;
+	padding-top: 0.3em;
 	position: absolute;
-
+	text-transform: uppercase;
 }
+
 
 
