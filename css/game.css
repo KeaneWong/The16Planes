@@ -71,6 +71,7 @@
 	text-align: center;
 	margin: 0.4em 0 0 0;
 	line-height: 1;
+	font-weight: 800;
 	font-family: 'Playfair Display';
 	color: #804e52;
 	text-transform: uppercase;
@@ -167,7 +168,7 @@ text {
 
 .CurrentWorld
 {
-	font-family: "Noto Serif Display";
+	font-family: "Gideon Roman";
 	font-weight: 900;
 	font-size: 1.3em;
 	letter-spacing: 0.1em;

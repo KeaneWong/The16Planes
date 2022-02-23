@@ -1307,5 +1307,18 @@ function FadeIn (){
 		opacity: 1
 	  }, 1100);
 	});
+	ChangeCreditColor();
   };
+
+function ChangeCreditColor(){
+	if(curPlane < 13)
+	{
+		$("#creditToMe").css("color","#804e52");
+	}
+	else
+	{
+		$("#creditToMe").css("color","#c0c0c0");
+	}
+	
+}
 
