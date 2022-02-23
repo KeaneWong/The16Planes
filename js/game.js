@@ -26,8 +26,8 @@ const Planes = [
 	},
     {
 		Name: "Plane of Air",
-		color1: "#CAE35F",
-		color2: "#DAE35F"
+		color1: "#33CCFF",
+		color2: "#66D9FF"
     },
     {
 		Name: "Plane of Water",
