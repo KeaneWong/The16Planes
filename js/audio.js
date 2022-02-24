@@ -3,9 +3,8 @@
 var sounds = new Array(
     new Audio("../Assets/Music/The Oh Hellos - Soldier, Poet, King (Piano Tutorial).mp3"),
     new Audio("../Assets/Music/Dirty Paws - Of Monsters And Men - Piano Cover.mp3"),
-    //new Audio("../Assets/Music/Aviators - Traveler's Song (Instrumental) [Fantasy Rock].mp3"),
-    //new Audio("../Assets/Music/Maw of the King (Instrumental).mp3"),
     new Audio("../Assets/Music/Of Monsters and Men - Little Talks [PIANO TUTORIAL + SHEET MUSIC].mp3"),
+    new Audio("../Assets/Music/TheFatRat - Monody - EASY Piano Tutorial by PlutaX.mp3"),
     new Audio("../Assets/Music/Tuba Knight Boss Battle Theme - Cinematic Orchestra Remix.mp3")
 
     );
@@ -18,7 +17,7 @@ function playSnd() {
     {
         i = 0;
     }
-    sounds[i].volume = 0.05;
+    sounds[i].volume = 0.3;
     sounds[i].addEventListener('ended', playSnd);
     sounds[i].play();
 }
