@@ -61,8 +61,8 @@ const Planes = [
     },
     {
 		Name: "Elysium",
-		color1: "#BCE6FF",
-		color2: "CCE6FF"
+		color1: "#E8B319.",
+		color2: "#E43414"
     },
     {
 		Name: "Beastlands",
@@ -1245,7 +1245,10 @@ window.addEventListener('load', init, false);
 //jquery section
 $(document).ready(function(){
 	$('#TheUnseen').hide();
-	
+	originalCreditToMe = $('#creditToMe').text();
+	originalTopTitle = $('#topTitle').text();
+	originalMidTitle = $('#midTitle').text();
+	originalBotTitle = $('#botTitle').text();
     //when we click diceRoller
     $("#diceRoller").click(function(){
 
@@ -1330,7 +1333,6 @@ var PlaneOfTheUnseen = Math.floor(Math.random()*20)+1;
 console.log("A mysterious being spotted in", Planes[PlaneOfTheUnseen-1].Name);
 //hide by default
 $('#TheUnseen').hide();
-$
 
 function SummonUnseen(){
 	if(curPlane == PlaneOfTheUnseen){
@@ -1342,6 +1344,12 @@ function SummonUnseen(){
 }
 var timeUntilScare = 0;
 var flipped = false;
+var originalCreditToMe;
+
+var originalTopTitle;
+var originalMidTitle;
+var originalBotTitle;
+
 function SummonArms()
 {
 	if(curPlane == PlaneOfTheUnseen)
@@ -1352,6 +1360,9 @@ function SummonArms()
 			{
 				flipped = true;
 				$('#UnseenArms').css('visibility',"visible");
+				$('#creditToMe').text('UEYSEE HM TYK UOUY BOK LFOD ZVEJK KOIRRS');
+				$('#topTitle').text('TF GABVX GIT YSMGKF');
+				$('#midTitle').text('TPXONEOG');
 			}
 
 		}
@@ -1359,8 +1370,12 @@ function SummonArms()
 		{
 			if(flipped)
 			{
-				$('#UnseenArms').css('visibility',"hidden");
 				flipped = false;
+				$('#UnseenArms').css('visibility',"hidden");
+				$('#creditToMe').text(originalCreditToMe);
+				$('#topTitle').text(originalTopTitle);
+				$('#midTitle').text(originalMidTitle);
+			
 			}
 		}
 		timeUntilScare++;

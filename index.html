@@ -18,15 +18,15 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script type="text/javascript" src="js/three.min.js"></script>
         <script type="text/javascript" src="js/game.js"></script>
-        <script type="text/javascript" src="js/diceroller.js"></script>
+        <script type="text/javascript" src="js/audio.js"></script>
     </head>
     <body>
         <div class = 'game-holder' id = "gameholder">
             <div class = "header" >    
                 <div class = 'headerContainer'>
-                    <h3 class = "shine noselect">180 days</h3>
-                    <h2 class = "shine noselect">Around the</h2>
-                    <h1 class = "shine noselect">W<object data = "Assets/GreatWheelCosmology.png" type = 'image/jpg' class = 'titleSVG' >O</object>RLDS</h1>
+                    <h3 id = 'topTitle' class = "shine noselect">180 days</h3>
+                    <h2 id = 'midTitle' class = "shine noselect">Around the</h2>
+                    <h1 id = 'botTitle' class = "shine noselect">W<object data = "Assets/GreatWheelCosmology.png" type = 'image/jpg' class = 'titleSVG' >O</object>RLDS</h1>
                     <h4 id = "creditToMe">An original Campaign by Keane Wong</h4>
                 </div>
             </div>
@@ -42,5 +42,9 @@
             <div id = "world" > </div>
             <a id = "diceRoller" class = "shineGold">ROLL</a>
         </div>
+        <audio id="player" >
+            <source id="playerSource" src="../Assets/Music/Maw of the King (Instrumental).mp3" type="audio/ogg" />
+            
+        </audio>
     </body>
 </html>
