@@ -358,7 +358,7 @@ Constellation = function(){
    this.mesh.add(lineVela);
 
    this.mesh.Stars = [];
-   var starGeom = new THREE.BoxGeometry(2,2,2);
+   var starGeom = new THREE.BoxGeometry(3,3,3);
    // create a material; a simple white material will do the trick
    var starMat = new THREE.MeshBasicMaterial({
    	color:0xD5AB55, opacity: 0, transparent: true
