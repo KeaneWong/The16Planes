@@ -393,11 +393,11 @@ Constellation = function(){
 var constellation;
 function createConstellation(){
 	constellation = new Constellation();
-	constellation.mesh.position.x = 910;
-	constellation.mesh.position.y = 630;
+	constellation.mesh.position.x = 860;
+	constellation.mesh.position.y = 600;
 	constellation.mesh.position.z = -1000;
 	//console.log(constellation.mesh);
-	var constellationScale = 0.7;
+	var constellationScale = 0.9;
 	constellation.mesh.scale.set(constellationScale,constellationScale ,constellationScale);
 	//console.log(constellation.mesh.children[0].geometry)
 	constellation.mesh.children[0].geometry.setDrawRange(0,0);
@@ -479,7 +479,7 @@ Constellation.prototype.FadeInStars = function() {
 					}
 					else if (StarDrawRangeBegin >= MAX_POINTS_ARGO && StarDrawRangeBegin < (MAX_POINTS_ARGO+MAX_POINTS_VELA+1))
 					{
-						console.log(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO));
+						//console.log(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO));
 						this.mesh.children[1].geometry.setDrawRange(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO), MAX_POINTS_ARGO+MAX_POINTS_VELA-StarDrawRangeBegin);
 						this.mesh.children[1].geometry.needsUpdate = true;
 						StarDrawRangeBegin += 0.008;
@@ -1284,7 +1284,7 @@ function GenerateNumber(){
 	//curPlane = numberRolled;
 	$("#diceRoller").text(numberRolled);
 	$("#diceRoller").css("font-size", 1.5 + "em");
-	console.log("Yo");
+	//console.log("Yo");
 };
 
 function FadeIn (){

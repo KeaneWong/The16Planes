@@ -26,8 +26,8 @@ var isMuted = false;
 document.addEventListener('keydown', logKey);
 var firstPlay = false;
 function logKey(e) {
-    console.log(e.code);
-    console.log("He");
+    //console.log(e.code);
+    //console.log("He");
 
     if(e.code == "KeyM")
     {
