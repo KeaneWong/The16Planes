@@ -360,14 +360,22 @@ Constellation = function(){
    this.mesh.Stars = [];
    var starGeom = new THREE.BoxGeometry(3,3,3);
    // create a material; a simple white material will do the trick
+   /*var starMat = new THREE.MeshBasicMaterial({
+   	color:0xD5AB55,opacity: 0, transparent: true
+   });*/
    var starMat = new THREE.MeshBasicMaterial({
-   	color:0xD5AB55, opacity: 0, transparent: true
+	   color:0xD5AB55
    });
    indexA = 0;
    count = 0;
    for(var i = 0; i < MAX_POINTS_ARGO; i++)
    {
+	   /*
+		var starMat = new THREE.MeshBasicMaterial({
+			color:0xD5AB55,opacity: 0, transparent: true
+		});*/
 		var s = new THREE.Mesh(starGeom, starMat);
+		s.visible = false;
 		s.position.x = positionsArgo[indexA++];
 		s.position.y = positionsArgo[indexA++];
 		s.position.z = positionsArgo[indexA++];
@@ -378,7 +386,12 @@ Constellation = function(){
    indexA = 0;
    for(var i = 0; i < MAX_POINTS_VELA; i++)
    {
+	   /*
+		var starMat = new THREE.MeshBasicMaterial({
+			color:0xD5AB55,opacity: 0, transparent: true
+		});*/
 		var s = new THREE.Mesh(starGeom, starMat);
+		s.visible = false;
 		s.position.x = VelaNavis[indexA++]-500;
 		s.position.y = VelaNavis[indexA++]+400;
 		s.position.z = 0;
@@ -389,6 +402,7 @@ Constellation = function(){
    }
    //console.log(MAX_POINTS_ARGO,MAX_POINTS_VELA);
    //console.log("COUNT IS : ", count);
+   //console.log(this.mesh.Stars);
 }
 var constellation;
 function createConstellation(){
@@ -414,6 +428,7 @@ var StarDrawRange = 0;
 var finishedFadeIn = false;
 var lingerTimer = 0;
 var StarDrawRangeBegin = 0;
+var finishedUndrawingLines = false;
 Constellation.prototype.FadeInStars = function() {
 	//ensures that this only happens during the nighttime, aka when the count is on a cycle of pi but not 2pi
 	if((Math.cos(SunCycleCount).toFixed(1) == -1 && SunCycleCount>0))
@@ -426,25 +441,34 @@ Constellation.prototype.FadeInStars = function() {
 		//console.log(Starindex);
 		if(!finishedFadeIn)
 		{
-			if(Starindex<stars.length){
-				stars[Starindex].material.transparent = false;
-				stars[Starindex].material.opacity+=0.015;
-				stars[Starindex].material.needsUpdate = true;
+			if(Starindex<stars.length-1){
+				Starindex+=0.15;
+				console.log(Starindex);
+				//stars[Math.floor(Starindex)].material.transparent = false;
+				//stars[Math.floor(Starindex)].material.opacity = 1;
+				stars[Math.floor(Starindex)].visible = true;
+				if(Math.floor(Starindex) == Starindex && Starindex>1)
+				{
+					console.log(stars);
+				}
+				stars[Math.floor(Starindex)].needsUpdate = true;
 				//console.log(stars[Starindex]);
 	
-				if(stars[Starindex].material.opacity>=1)
+				/*
+				if(stars[Math.floor(Starindex)].material.opacity>=1)
 				{
 					Starindex++;
 				}
+				*/
 			}
 			//a sign that all the stars have rendered
-			else if(Starindex>=stars.length && StarDrawRange < MAX_POINTS_ARGO+1){
+			else if(Starindex>=stars.length-1 && StarDrawRange < MAX_POINTS_ARGO+1){
 				StarDrawRange+=0.15;
 				this.mesh.children[0].geometry.setDrawRange(StarDrawRangeBegin, Math.floor(StarDrawRange));
 				this.mesh.children[0].geometry.needsUpdate = true;
 				
 			}	//setting draw range for velanavis
-			else if (Starindex>=stars.length && StarDrawRange > MAX_POINTS_ARGO && StarDrawRange < MAX_POINTS_ARGO+MAX_POINTS_VELA+1){
+			else if (Starindex>=stars.length-1 && StarDrawRange > MAX_POINTS_ARGO && StarDrawRange < MAX_POINTS_ARGO+MAX_POINTS_VELA+1){
 				StarDrawRange+=0.15;
 				this.mesh.children[1].geometry.setDrawRange(StarDrawRangeBegin, Math.floor(StarDrawRange) - MAX_POINTS_ARGO);
 				this.mesh.children[1].geometry.needsUpdate = true;
@@ -456,36 +480,57 @@ Constellation.prototype.FadeInStars = function() {
 				console.log("Benchmakr1");
 			}	
 		}
-		//console.log("Yp",lingerTimer);
-		//console.log(inStarAnimation);
+
 		if(finishedFadeIn)
 		{
 			//this if statement makes it so that whatever is inside is only run once.
 			//console.log("Whatup");
-			if(lingerTimer > 400)
+			if(lingerTimer > 300)
 			{
 				//console.log("Ye");
-				for(var i = 0; i < stars.length;i++)
-				{
-					stars[i].material.opacity-=0.0002;
-					stars[i].material.needsUpdate = true; 
-					if(StarDrawRangeBegin < MAX_POINTS_ARGO)
+				if(!finishedUndrawingLines){
+					for(var i = 0; i < stars.length;i++)
 					{
-						
-						this.mesh.children[0].geometry.setDrawRange(Math.floor(StarDrawRangeBegin), MAX_POINTS_ARGO-StarDrawRangeBegin);
-						this.mesh.children[0].geometry.needsUpdate = true;
-						StarDrawRangeBegin += 0.008;
-						
-					}
-					else if (StarDrawRangeBegin >= MAX_POINTS_ARGO && StarDrawRangeBegin < (MAX_POINTS_ARGO+MAX_POINTS_VELA+1))
-					{
-						//console.log(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO));
-						this.mesh.children[1].geometry.setDrawRange(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO), MAX_POINTS_ARGO+MAX_POINTS_VELA-StarDrawRangeBegin);
-						this.mesh.children[1].geometry.needsUpdate = true;
-						StarDrawRangeBegin += 0.008;
+						//stars[i].material.opacity-=0.0002;
+						//stars[i].material.needsUpdate = true; 
+						if(StarDrawRangeBegin < MAX_POINTS_ARGO)
+						{
+							
+							this.mesh.children[0].geometry.setDrawRange(Math.floor(StarDrawRangeBegin), MAX_POINTS_ARGO-StarDrawRangeBegin);
+							this.mesh.children[0].geometry.needsUpdate = true;
+							StarDrawRangeBegin += 0.008;
+							
+						}
+						else if (StarDrawRangeBegin >= MAX_POINTS_ARGO && StarDrawRangeBegin < (MAX_POINTS_ARGO+MAX_POINTS_VELA+1))
+						{
+							//console.log(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO));
+							this.mesh.children[1].geometry.setDrawRange(Math.floor(StarDrawRangeBegin-MAX_POINTS_ARGO), MAX_POINTS_ARGO+MAX_POINTS_VELA-StarDrawRangeBegin);
+							this.mesh.children[1].geometry.needsUpdate = true;
+							StarDrawRangeBegin += 0.008;
+						}
+						else{
+							finishedUndrawingLines = true;
+						}
 					}
 				}
-				
+				else
+				{
+					stars[Math.floor(Starindex)].visible = false;
+					stars[Math.floor(Starindex)].needsUpdate = true; 
+					Starindex-=0.25
+
+					if(Starindex<=0){
+						inStarAnimation = false;//flag to trip the fade out animation is done
+						lingerTimer=0;
+						Starindex = 0;
+						StarDrawRange = 0;
+						StarDrawRangeBegin = 0;
+						finishedFadeIn = false;
+						finishedUndrawingLines = false;
+					}
+				}
+
+				/*
 				if(stars[0].material.opacity <= 0)
 				{
 					console.log("Done")
@@ -496,7 +541,8 @@ Constellation.prototype.FadeInStars = function() {
 					StarDrawRange = 0;
 					StarDrawRangeBegin = 0;
 					finishedFadeIn = false;
-				}
+				}*/
+
 			}
 			else{
 				
@@ -1014,7 +1060,153 @@ function rollDie(){
 	}
 	
 }
+var particlesPool = [];
+var particlesInUse = [];
+function createParticles(){
+	for (var i=0; i<10; i++){
+	  var particle = new Particle();
+	  particlesPool.push(particle);
+	}
+	particlesHolder = new ParticlesHolder();
+	//ennemiesHolder.mesh.position.y = -game.seaRadius;
+	scene.add(particlesHolder.mesh)
+  }
+Particle = function(){
+	var geom = new THREE.TetrahedronGeometry(3,0);
+	var mat = new THREE.MeshPhongMaterial({
+	  color:0x009999,
+	  shininess:0,
+	  specular:0xffffff,
+	  shading:THREE.FlatShading
+	});
+	this.mesh = new THREE.Mesh(geom,mat);
+  }
+  
+  Particle.prototype.explode = function(pos, color, scale){
+	var _this = this;
+	var _p = this.mesh.parent;
+	this.mesh.material.color = new THREE.Color( color);
+	this.mesh.material.needsUpdate = true;
+	this.mesh.scale.set(scale, scale, scale);
+	var targetX = pos.x + (-1 + Math.random()*2)*50;
+	var targetY = pos.y + (-1 + Math.random()*2)*50;
+	var speed = .6+Math.random()*.2;
+	TweenMax.to(this.mesh.rotation, speed, {x:Math.random()*12, y:Math.random()*12});
+	TweenMax.to(this.mesh.scale, speed, {x:.1, y:.1, z:.1});
+	TweenMax.to(this.mesh.position, speed, {x:targetX, y:targetY, delay:Math.random() *.1, ease:Power2.easeOut, onComplete:function(){
+		if(_p) _p.remove(_this.mesh);
+		_this.mesh.scale.set(1,1,1);
+		particlesPool.unshift(_this);
+	  }});
+  }
+  
+  ParticlesHolder = function (){
+	this.mesh = new THREE.Object3D();
+	this.particlesInUse = [];
+  }
+  
+  ParticlesHolder.prototype.spawnParticles = function(pos, density, color, scale){
+  
+	var nPArticles = density;
+	for (var i=0; i<nPArticles; i++){
+	  var particle;
+	  if (particlesPool.length) {
+		particle = particlesPool.pop();
+	  }else{
+		particle = new Particle();
+	  }
+	  this.mesh.add(particle.mesh);
+	  particle.mesh.visible = true;
+	  var _this = this;
+	  particle.mesh.position.y = pos.y;
+	  particle.mesh.position.x = pos.x;
+	  particle.explode(pos,color, scale);
+	}
+  }
+  
 
+function createCoins(){
+
+	coinsHolder = new CoinsHolder(20);
+	scene.add(coinsHolder.mesh)
+  }
+
+  
+Coin = function(){
+	//var geom = new THREE.TetrahedronGeometry(5,0);
+	var geom = new THREE.CylinderGeometry( 3, 3, 1, 8 );
+	var mat = new THREE.MeshPhongMaterial({
+	  color:0xFFD700,
+	  shininess:0,
+	  specular:0xffffff,
+  
+	  shading:THREE.FlatShading
+	});
+	this.mesh = new THREE.Mesh(geom,mat);
+	this.mesh.castShadow = true;
+	this.angle = 0;
+	this.dist = 0;
+  }
+  
+  CoinsHolder = function (nCoins){
+	this.mesh = new THREE.Object3D();
+	this.coinsInUse = [];
+	this.coinsPool = [];
+	for (var i=0; i<nCoins; i++){
+	  var coin = new Coin();
+	  this.coinsPool.push(coin);
+	}
+  }
+  
+  CoinsHolder.prototype.spawnCoins = function(){
+  
+	var nCoins = 1 + Math.floor(Math.random()*10);
+	var d = 600 + 100 + (-1 + Math.random() * 2) * (80-20);
+	var amplitude = 10 + Math.round(Math.random()*10);
+	for (var i=0; i<nCoins; i++){
+	  var coin;
+	  if (this.coinsPool.length) {
+		coin = this.coinsPool.pop();
+		//console.log("Yop");
+	  }else{
+		coin = new Coin();
+	  }
+	  this.mesh.add(coin.mesh);
+	  this.coinsInUse.push(coin);
+	  coin.angle = -(i*0.02);
+	  coin.distance = d + Math.cos(i*.5)*amplitude;
+	  coin.mesh.position.y = -600 + Math.sin(coin.angle)*coin.distance;
+	  coin.mesh.position.x = Math.cos(coin.angle)*coin.distance;
+	}
+  }
+  
+  CoinsHolder.prototype.rotateCoins = function(){
+	for (var i=0; i<this.coinsInUse.length; i++){
+	  var coin = this.coinsInUse[i];
+	  if (coin.exploding) continue;
+	  coin.angle += 0.01*1*0.5;
+	  if (coin.angle>Math.PI*2) coin.angle -= Math.PI*2;
+	  coin.mesh.position.y = -600 + Math.sin(coin.angle)*coin.distance;
+	  coin.mesh.position.x = Math.cos(coin.angle)*coin.distance;
+	  coin.mesh.rotation.z += Math.random()*.1;
+	  coin.mesh.rotation.y += Math.random()*.1;
+  
+	  //var globalCoinPosition =  coin.mesh.localToWorld(new THREE.Vector3());
+	  var diffPos = airplane.mesh.position.clone().sub(coin.mesh.position.clone());
+	  var d = diffPos.length();
+	  if (d<15){
+		this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
+		this.mesh.remove(coin.mesh);
+		particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, 0xFFD700, .8);
+		i--;
+
+	  }else if (coin.angle > Math.PI){
+		this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
+		this.mesh.remove(coin.mesh);
+		i--;
+	  }
+	}
+  }
 
 
 var mousePos = {x:0, y:0};
@@ -1113,10 +1305,19 @@ var flip = true;
 var flipCount = 2*3.14;
 const mushCapOriginalColor = new THREE.Color(Colors.mossGreen);
 const mushCapChangeColor = new THREE.Color(Colors.oliveGreen);
+var distance = 0;
+var coinLastSpawn = 0;
 function loop(){
 	
+	// Add energy coins every 100m;
+	distance+=1;
+	if (Math.floor(distance)%200 == 0 && Math.floor(distance) > coinLastSpawn){
+		//console.log("Yo");
+		coinLastSpawn = Math.floor(distance);
+		coinsHolder.spawnCoins();
+	}
+	coinsHolder.rotateCoins();
 
-	
 	sea.moveWaves();
 	if(idle)
 	{
@@ -1224,6 +1425,11 @@ function init()
 	createDie(); //'die' meaning singular dice
 
 	createConstellation();
+
+	createCoins();
+
+	createParticles();
+
 
 	//add the listener
 	document.addEventListener('mousemove', handleMouseMove, false);
