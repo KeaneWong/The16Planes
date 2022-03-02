@@ -555,6 +555,15 @@ Constellation.prototype.FadeInStars = function() {
 }
 
 
+function AddFunds(){
+	funds = funds+1;
+	$("#partyFunds").text( funds); 
+	if(funds == 180)
+	{
+		RevealHiddenMessage();
+	}
+}
+
 
 Sea = function(){
 	var geom = new THREE.CylinderBufferGeometry(600,600,800,40,10);
@@ -1179,6 +1188,8 @@ Coin = function(){
 	  coin.mesh.position.x = Math.cos(coin.angle)*coin.distance;
 	}
   }
+
+  var funds = 0;
   
   CoinsHolder.prototype.rotateCoins = function(){
 	for (var i=0; i<this.coinsInUse.length; i++){
@@ -1199,6 +1210,10 @@ Coin = function(){
 		this.mesh.remove(coin.mesh);
 		particlesHolder.spawnParticles(coin.mesh.position.clone(), 5, 0xFFD700, .8);
 		i--;
+		if(funds<=999)
+		{
+			AddFunds();
+		}
 
 	  }else if (coin.angle > Math.PI){
 		this.coinsPool.unshift(this.coinsInUse.splice(i,1)[0]);
@@ -1310,6 +1325,7 @@ var coinLastSpawn = 0;
 function loop(){
 	
 	// Add energy coins every 100m;
+
 	distance+=1;
 	if (Math.floor(distance)%200 == 0 && Math.floor(distance) > coinLastSpawn){
 		//console.log("Yo");
@@ -1482,6 +1498,7 @@ $(document).ready(function(){
 
 	});
   });
+  
 
 
 function GenerateNumber(){
@@ -1523,6 +1540,31 @@ function FadeIn (){
 	SummonUnseen();
   };
 
+function RevealHiddenMessage(){
+
+
+var $all_msg = $('#hiddenMessage');
+jQuery('#hiddenMessage').css('opacity', '1');
+var $wordList = $('#hiddenMessage').text().split("");
+$('#hiddenMessage').text("");
+$.each($wordList, function(idx, elem) {
+	//create a span for the letter and set opacity to 0
+	var newEL = $("<span/>").text(elem).css({
+	  opacity: 0
+	});
+	//append it to the welcome message
+	newEL.appendTo($all_msg);
+	//set the delay on the animation for this element
+	newEL.delay(idx * 90);
+
+	newEL.animate({
+	  opacity: 0.5
+	}, 1100);
+  });
+	
+
+  };
+
 function ChangeCreditColor(){
 	if(curPlane < 13 && curPlane!=1 && curPlane !=4)
 	{
@@ -1533,7 +1575,7 @@ function ChangeCreditColor(){
 		$("#creditToMe").css("color","#c0c0c0");
 	}
 	
-}
+};
 
 var PlaneOfTheUnseen = Math.floor(Math.random()*20)+1;
 console.log("A mysterious being spotted in", Planes[PlaneOfTheUnseen-1].Name);
@@ -1567,8 +1609,8 @@ function SummonArms()
 				flipped = true;
 				$('#UnseenArms').css('visibility',"visible");
 				$('#creditToMe').text('UEYSEE HM TYK UOUY BOK LFOD ZVEJK KOIRRS');
-				$('#topTitle').text('TF GABVX GIT YSMGKF');
-				$('#midTitle').text('TPXONEOG');
+				$('#topTitle').text('OLPY NXZLZ');
+				$('#midTitle').text('SCKNXCA');
 			}
 
 		}
@@ -1597,5 +1639,4 @@ function SummonArms()
 
 
 }
-
 

@@ -192,7 +192,46 @@ text {
 	position: absolute;
 	text-transform: uppercase;
 }
-
+.playerFunds
+{
+	font-family: "Gideon Roman";
+	font-weight: 900;
+	font-size: 1.1em;
+	letter-spacing: 0.1em;
+	margin: 0.4em; 
+	text-align: right;
+	width: 96%;
+	padding-right: 1em;
+	padding-top: 0.3em;
+	position: absolute;
+	text-transform: uppercase;
+}
+.hiddenMessage
+{
+	font-family: "Gideon Roman";
+	font-weight: 900;
+	font-size: 1.1em;
+	letter-spacing: 0.1em;
+	margin: 0.4em; 
+	text-align: right;
+	color:#FF0000;
+	bottom: 0%;
+	left:0%;
+	padding-right: 1em;
+	padding-top: 2.3em;
+	position: absolute;
+	text-transform: uppercase;
+	opacity: 0;
+	z-index: 10;
+	pointer-events: none;
+}
+.goldCoin
+{
+	height: 2em;
+	width: auto;
+	margin-bottom: -0.5em;
+	
+}
 .UnseenArms{
 	position: Absolute;
 	left:50%;
