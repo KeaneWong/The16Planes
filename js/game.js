@@ -443,7 +443,7 @@ Constellation.prototype.FadeInStars = function() {
 		{
 			if(Starindex<stars.length-1){
 				Starindex+=0.15;
-				console.log(Starindex);
+				//console.log(Starindex);
 				//stars[Math.floor(Starindex)].material.transparent = false;
 				//stars[Math.floor(Starindex)].material.opacity = 1;
 				stars[Math.floor(Starindex)].visible = true;
@@ -1608,9 +1608,9 @@ function SummonArms()
 			{
 				flipped = true;
 				$('#UnseenArms').css('visibility',"visible");
-				$('#creditToMe').text('UEYSEE HM TYK UOUY BOK LFOD ZVEJK KOIRRS');
-				$('#topTitle').text('OLPY NXZLZ');
-				$('#midTitle').text('SCKNXCA');
+				$('#creditToMe').text('UEYSEEHMTYKUOUYBOKLFODZVEJKKOIRRS');
+				$('#topTitle').text('JVVSOVL');
+				$('#midTitle').text('WVWDTJPPN');
 			}
 
 		}
